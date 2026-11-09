@@ -92,7 +92,7 @@ const SABORES = {
   naranja: { n: 'Naranja', e: '🍊', img: 'sabores/naranja.jpg', fruta: 'Naranja', d: 'Cítrica y alegre, como un jugo recién exprimido. Suave, dulce y muy aromática.' },
   menta:   { n: 'Menta',   e: '🌿', img: 'sabores/menta.jpg',   fruta: 'Hierbabuena', d: 'Fresca y ligera, con hojitas de menta. Ideal después de comer o para quien prefiere un dulce suave.' }
 };
-const fichaBase = '<li>🌿 Gelatina vegetal (agar), sin gelatina animal</li><li>✋ Receta artesanal Mr Santos</li><li>🧤 Hechas a mano, con guantes</li>';
+const fichaBase = '<li>🌿 Gelatina vegetal (agar), sin gelatina animal</li><li>✋ Receta artesanal Sigan Probando</li><li>🧤 Hechas a mano, con guantes</li>';
 (function () {
   const st = document.createElement('style');
   st.textContent = `.mdl{position:fixed;inset:0;z-index:70;display:none;align-items:flex-end;justify-content:center}.mdl.open{display:flex}

@@ -2,11 +2,11 @@
 <html lang="es">
 <head>
 <script>
-window.alert=function(m){try{var d=document.createElement('div');d.setAttribute('style','position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:24px');d.innerHTML='<div style="background:#141414;border:1px solid rgba(245,158,11,.5);border-radius:18px;max-width:360px;width:100%;padding:22px;font-family:system-ui,sans-serif;color:#f5f5f5;text-align:center"><div style="color:#f59e0b;font-weight:800;letter-spacing:2px;font-size:13px;margin-bottom:10px">MR SANTOS</div><div style="font-size:15px;line-height:1.45;white-space:pre-line"></div><button style="margin-top:18px;background:#f59e0b;color:#111;border:0;border-radius:12px;padding:10px 26px;font-weight:800;font-size:14px">Aceptar</button></div>';d.querySelector('div div:nth-child(2)').textContent=String(m);d.querySelector('button').onclick=function(){d.remove()};(document.body||document.documentElement).appendChild(d);}catch(e){}};
+window.alert=function(m){try{var d=document.createElement('div');d.setAttribute('style','position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:24px');d.innerHTML='<div style="background:#141414;border:1px solid rgba(245,158,11,.5);border-radius:18px;max-width:360px;width:100%;padding:22px;font-family:system-ui,sans-serif;color:#f5f5f5;text-align:center"><div style="color:#f59e0b;font-weight:800;letter-spacing:2px;font-size:13px;margin-bottom:10px">SIGAN PROBANDO</div><div style="font-size:15px;line-height:1.45;white-space:pre-line"></div><button style="margin-top:18px;background:#f59e0b;color:#111;border:0;border-radius:12px;padding:10px 26px;font-weight:800;font-size:14px">Aceptar</button></div>';d.querySelector('div div:nth-child(2)').textContent=String(m);d.querySelector('button').onclick=function(){d.remove()};(document.body||document.documentElement).appendChild(d);}catch(e){}};
 </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mr Santos- Panel de Control Interno</title>
+    <title>Sigan Probando- Panel de Control Interno</title>
 <link rel="icon" type="image/png" href="favicon-ms.png">
 <link rel="apple-touch-icon" href="favicon-ms.png">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -297,7 +297,7 @@ window.alert=function(m){try{var d=document.createElement('div');d.setAttribute(
 
     </main>
 
-    <footer class="border-t border-stone-950 bg-black/60 p-4 text-center text-[10px] text-stone-600 font-mono tracking-widest mt-12">© 2026 MR SANTOS PANEL. TODOS LOS DERECHOS RESERVADOS.</footer>
+    <footer class="border-t border-stone-950 bg-black/60 p-4 text-center text-[10px] text-stone-600 font-mono tracking-widest mt-12">© 2026 SIGAN PROBANDO PANEL. TODOS LOS DERECHOS RESERVADOS.</footer>
 
     <script>
         const SUPABASE_URL = "https://mkewwlmeikixpvfayisj.supabase.co"; 
@@ -954,12 +954,12 @@ window.alert=function(m){try{var d=document.createElement('div');d.setAttribute(
             const ubic = String((window.__ubicOrden || {})[idOrden] || '');
             const esLocal = /DELIVERY/i.test(ubic);
             if (esLocal) {
-                return `Hola, soy Mr Santos. ¡Gracias por tu compra! ✅\n\nTu pedido *#${idOrden}* fue confirmado y ya recibí tu dirección. 📍\n\nEn este momento estoy empacando tu pedido para llevártelo por delivery. Como estás dentro de la ciudad, la entrega tarda de 30 minutos a 1 hora aproximadamente. 🛵\n\nTe escribo por aquí cuando vaya en camino.\n\nCualquier duda, respóndeme este mensaje y con gusto te atiendo.\n\nUn abrazo,\nMr Santos 🍬`;
+                return `Hola, soy Sigan Probando. ¡Gracias por tu compra! ✅\n\nTu pedido *#${idOrden}* fue confirmado y ya recibí tu dirección. 📍\n\nEn este momento estoy empacando tu pedido para llevártelo por delivery. Como estás dentro de la ciudad, la entrega tarda de 30 minutos a 1 hora aproximadamente. 🛵\n\nTe escribo por aquí cuando vaya en camino.\n\nCualquier duda, respóndeme este mensaje y con gusto te atiendo.\n\nUn abrazo,\nSigan Probando 🍬`;
             }
             const m = ubic.match(/AGENCIA:\s*([^/]+)/i);
             let agencia = m ? m[1].replace(/\(.*?\)/g, '').trim() : '';
             const txtAgencia = agencia ? `a la agencia ${agencia}` : 'a la agencia de envío que elegiste';
-            return `Hola, soy Mr Santos. ¡Gracias por tu compra! ✅\n\nTu pedido *#${idOrden}* fue confirmado y ya recibí tus datos de envío. 📦\n\nEn este momento estoy empacando tu pedido. Lo entrego ${txtAgencia} el próximo día hábil y te paso el número de guía por aquí apenas lo despache.\n\nDesde ese momento, la agencia suele tardar de 1 a 3 días hábiles en llevarlo a tu ciudad, según el destino (no cuentan fines de semana ni feriados).\n\nCualquier duda, respóndeme este mensaje y con gusto te atiendo.\n\nUn abrazo,\nMr Santos 🍬`;
+            return `Hola, soy Sigan Probando. ¡Gracias por tu compra! ✅\n\nTu pedido *#${idOrden}* fue confirmado y ya recibí tus datos de envío. 📦\n\nEn este momento estoy empacando tu pedido. Lo entrego ${txtAgencia} el próximo día hábil y te paso el número de guía por aquí apenas lo despache.\n\nDesde ese momento, la agencia suele tardar de 1 a 3 días hábiles en llevarlo a tu ciudad, según el destino (no cuentan fines de semana ni feriados).\n\nCualquier duda, respóndeme este mensaje y con gusto te atiendo.\n\nUn abrazo,\nSigan Probando 🍬`;
         }
 
         async function confirmarYEnviarPedido(idOrden, telefonoCliente, codigoPremio) {

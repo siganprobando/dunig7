@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0b0b">
-<title>Costo y Precio de tu Postre · Mr Santos</title>
+<title>Costo y Precio de tu Postre · Sigan Probando</title>
 <meta name="description" content="Calcula cuánto te cuesta de verdad cada postre y a qué precio venderlo en dólares y bolívares.">
 <style>
 :root{--negro:#0b0b0b;--negro2:#161616;--negro3:#222;--oro:#d4af37;--oro2:#f5d77a;--oro3:#9c7c1c;--texto:#f3ecd8;--gris:#a89f88;--rojo:#e0675a;--verde:#7fcf8a}
@@ -61,7 +61,7 @@ footer{text-align:center;color:var(--oro);font-size:13px;padding:22px 0 10px;let
 <body>
 <div class="wrap">
 <header>
-  <span class="logo">Mr Santos</span>
+  <span class="logo">Sigan Probando</span>
   <h1>🍰 ¿Cuánto me cuesta mi postre y a cuánto lo vendo?</h1>
   <p class="sub">Anota tus ingredientes con el precio del paquete que compraste. La calculadora saca el costo real de cada porción, suma empaque, gas y tu trabajo, y te dice el precio de venta en $ y en Bs.</p>
 </header>
@@ -138,7 +138,7 @@ footer{text-align:center;color:var(--oro);font-size:13px;padding:22px 0 10px;let
   <p class="hint">Se guardan solo en este teléfono. Toca una para abrirla; mantén presionado para borrarla.</p>
 </section>
 
-<footer>Mr Santos · Herramientas gratis para emprendedores</footer>
+<footer>Sigan Probando · Herramientas gratis para emprendedores</footer>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -193,7 +193,7 @@ function textoWhatsApp(nombre, r){
   t += 'Precio por porción: ' + fmtUsd(r.precio) + (r.tasa>0 ? ' (' + fmtBs(r.precio*r.tasa) + ')' : '') + '\n';
   t += 'Postre entero: ' + fmtUsd(r.precioEntero) + (r.tasa>0 ? ' (' + fmtBs(r.precioEntero*r.tasa) + ')' : '') + '\n';
   t += '\n_Costo por porción: ' + fmtUsd(r.costoPorcion) + ' · Ganancia: ' + fmtUsd(r.ganancia) + '_\n';
-  t += '\nCalculado con Mr Santos · Herramientas gratis para emprendedores';
+  t += '\nCalculado con Sigan Probando · Herramientas gratis para emprendedores';
   return t;
 }
 if (typeof module !== 'undefined') { module.exports = { num:num, costoIngrediente:costoIngrediente, redondearArriba:redondearArriba, calcular:calcular, textoWhatsApp:textoWhatsApp, fmtUsd:fmtUsd }; }

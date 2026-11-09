@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Referidos · Mr Santos</title>
+    <title>Registro de Referidos · Sigan Probando</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -107,17 +107,17 @@
             <div class="bg-stone-900/60 border border-stone-800 rounded-xl p-3.5 text-[11px] text-stone-400 leading-relaxed space-y-1">
                 <p><strong class="text-amber-400">Cómo ganas:</strong> tu cliente compra en la app y coloca tu código. Bronce 10% (1-9 ventas), Plata 12% (10-24), Oro 15% (25+). La comisión es sobre el producto, sin el envío.</p>
                 <p><strong class="text-amber-400">Pagos:</strong> los viernes por Pago Móvil o Binance, mínimo $5.</p>
-                <p><strong class="text-amber-400">Reglas:</strong> respeta los precios, nada de spam, nunca recibas pagos a tu nombre (el cliente paga directo a Mr Santos) y no prometas tiempos de entrega.</p>
+                <p><strong class="text-amber-400">Reglas:</strong> respeta los precios, nada de spam, nunca recibas pagos a tu nombre (el cliente paga directo a Sigan Probando) y no prometas tiempos de entrega.</p>
             </div>
             <div class="grid gap-2.5">
                 <a id="btn-mi-wa" target="_blank" rel="noopener" class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-futurista font-black py-3.5 rounded-xl text-[11px] uppercase tracking-[0.12em] flex items-center justify-center gap-2"><i data-lucide="message-circle" class="w-4 h-4"></i> Guardar mi kit en mi WhatsApp</a>
-                <a id="btn-avisar" target="_blank" rel="noopener" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 text-black font-futurista font-black py-3.5 rounded-xl text-[11px] uppercase tracking-[0.12em] flex items-center justify-center gap-2"><i data-lucide="send" class="w-4 h-4"></i> Confirmar registro con Mr Santos</a>
+                <a id="btn-avisar" target="_blank" rel="noopener" class="w-full bg-gradient-to-r from-amber-400 to-amber-500 text-black font-futurista font-black py-3.5 rounded-xl text-[11px] uppercase tracking-[0.12em] flex items-center justify-center gap-2"><i data-lucide="send" class="w-4 h-4"></i> Confirmar registro con Sigan Probando</a>
                 <button type="button" onclick="copiarKit()" id="btn-copiar" class="w-full border border-amber-500/30 text-amber-400 font-futurista font-bold py-3 rounded-xl text-[11px] uppercase tracking-[0.12em] flex items-center justify-center gap-2"><i data-lucide="copy" class="w-4 h-4"></i> Copiar todo</button>
             </div>
         </div>
     </main>
 
-    <footer class="border-t border-stone-950 bg-black/60 p-4 text-center text-[10px] text-stone-600 font-mono tracking-widest">© 2026 Mr Santos · <a href="https://mrsantos-ve.github.io/dunig7/terminos.html" target="_blank" rel="noopener" class="text-amber-500 underline">Términos y Condiciones</a></footer>
+    <footer class="border-t border-stone-950 bg-black/60 p-4 text-center text-[10px] text-stone-600 font-mono tracking-widest">© 2026 Sigan Probando · <a href="https://mrsantos-ve.github.io/dunig7/terminos.html" target="_blank" rel="noopener" class="text-amber-500 underline">Términos y Condiciones</a></footer>
 
     <script>
         const SUPABASE_URL = "https://mkewwlmeikixpvfayisj.supabase.co"; 
@@ -188,7 +188,7 @@
 
         function mostrarKit(nombre, cedula, telefono, ciudad, codigo, link, fecha) {
             textoKit =
-`*KIT DE REFERIDO Mr Santos*
+`*KIT DE REFERIDO Sigan Probando*
 Nombre: ${nombre}
 Código: *${codigo}*
 
@@ -207,10 +207,10 @@ https://mrsantos-ve.github.io/dunig7/terminos.html
 Cómo ganas: tu cliente compra en la app y coloca tu código. Bronce 10% (1-9 ventas), Plata 12% (10-24), Oro 15% (25+). Comisión sobre el producto, sin envío.
 Pagos: viernes por Pago Móvil o Binance, mínimo $5.
 Reglas: respeta los precios, nada de spam, nunca recibas pagos a tu nombre y no prometas tiempos de entrega.
-Eres afiliado independiente: no existe relación laboral con Mr Santos.`;
+Eres afiliado independiente: no existe relación laboral con Sigan Probando.`;
 
             const aviso =
-`Hola Mr Santos, me acabo de registrar como referido.
+`Hola Sigan Probando, me acabo de registrar como referido.
 Nombre: ${nombre}
 Cédula: ${cedula}
 Teléfono: ${telefono}

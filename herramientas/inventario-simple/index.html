@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Inventario Simple · DUNIGSHOP</title><meta name="theme-color" content="#0b0b0b">
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Inventario Simple · SIGAN PROBANDO</title><meta name="theme-color" content="#0b0b0b">
 <style>
   :root{--negro:#0b0b0b;--panel:#151515;--borde:#2a2414;--oro:#d4af37;--oro2:#f3d77a;--texto:#eee;--gris:#a8a08a}
   *{box-sizing:border-box}
@@ -43,7 +43,7 @@
   input[type=file]{display:none}
 </style>
 <style>.it{border:1px solid var(--borde);border-radius:10px;padding:10px;margin-bottom:8px}.it.bajo{border-color:#c0392b}.it b{color:var(--oro2)}.it .m{display:flex;gap:6px;margin-top:8px}.it .m button{flex:1;padding:10px;border-radius:8px;border:1px solid var(--oro);background:transparent;color:var(--oro2);font-size:15px}.it small{color:var(--gris);display:block}.al{color:#ff8a7a;font-weight:700}</style></head><body>
-<header><div class="marca">DUNIGSHOP</div><h1>Inventario Simple</h1><p>Controla tu stock, avisa cuando se acaba y calcula tu ganancia. Todo queda en tu teléfono.</p></header>
+<header><div class="marca">SIGAN PROBANDO</div><h1>Inventario Simple</h1><p>Controla tu stock, avisa cuando se acaba y calcula tu ganancia. Todo queda en tu teléfono.</p></header>
 <main>
 <section class="card"><h2>Agregar producto</h2>
 <label for="n">Nombre (ej: Gorra negra)</label><input id="n">
@@ -53,7 +53,7 @@
 <section class="card res"><h2>Resumen</h2><div id="res"></div></section>
 <section class="card"><h2>Productos</h2><div id="lista"></div>
 <button class="btn sec" id="cp" type="button">Copiar lista de stock</button><p class="aviso" id="msg"></p></section>
-</main><footer>DUNIGSHOP · Herramientas gratis para emprendedores</footer>
+</main><footer>SIGAN PROBANDO · Herramientas gratis para emprendedores</footer>
 <script>
 var K="dunig_inv",D=[];try{D=JSON.parse(localStorage.getItem(K)||"[]")}catch(e){D=[]}
 function $(i){return document.getElementById(i)}
@@ -70,7 +70,7 @@ function mv(i,d){D[i].s=Math.max(0,D[i].s+d);save()}
 function del(i){if(confirm("¿Borrar este producto?")){D.splice(i,1);save()}}
 $("add").onclick=function(){var n=$("n").value.replace(/^\s+|\s+$/g,"");if(!n){$("msg").textContent="Escribe el nombre del producto.";return}
 D.push({n:n,s:Math.floor(g("s")),mi:Math.floor(g("mi")),c:g("c"),p:g("p")});$("n").value="";$("s").value="";$("c").value="";$("p").value="";$("msg").textContent="Guardado.";save()};
-$("cp").onclick=function(){var t="Stock DUNIGSHOP:\n",i;for(i=0;i<D.length;i++)t+="• "+D[i].n+": "+D[i].s+"\n";
+$("cp").onclick=function(){var t="Stock SIGAN PROBANDO:\n",i;for(i=0;i<D.length;i++)t+="• "+D[i].n+": "+D[i].s+"\n";
 if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){$("msg").textContent="Lista copiada."})}else{$("msg").textContent=t}};
 draw();
 </script></body></html>

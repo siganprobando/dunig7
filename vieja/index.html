@@ -2,14 +2,14 @@
 <html lang="es">
 <head>
 <script>
-window.alert=function(m){try{var d=document.createElement('div');d.setAttribute('style','position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:24px');d.innerHTML='<div style="background:#141414;border:1px solid rgba(245,158,11,.5);border-radius:18px;max-width:360px;width:100%;padding:22px;font-family:system-ui,sans-serif;color:#f5f5f5;text-align:center"><div style="color:#f59e0b;font-weight:800;letter-spacing:2px;font-size:13px;margin-bottom:10px">MR SANTOS</div><div style="font-size:15px;line-height:1.45;white-space:pre-line"></div><button style="margin-top:18px;background:#f59e0b;color:#111;border:0;border-radius:12px;padding:10px 26px;font-weight:800;font-size:14px">Aceptar</button></div>';d.querySelector('div div:nth-child(2)').textContent=String(m);d.querySelector('button').onclick=function(){d.remove()};(document.body||document.documentElement).appendChild(d);}catch(e){}};
+window.alert=function(m){try{var d=document.createElement('div');d.setAttribute('style','position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:24px');d.innerHTML='<div style="background:#141414;border:1px solid rgba(245,158,11,.5);border-radius:18px;max-width:360px;width:100%;padding:22px;font-family:system-ui,sans-serif;color:#f5f5f5;text-align:center"><div style="color:#f59e0b;font-weight:800;letter-spacing:2px;font-size:13px;margin-bottom:10px">SIGAN PROBANDO</div><div style="font-size:15px;line-height:1.45;white-space:pre-line"></div><button style="margin-top:18px;background:#f59e0b;color:#111;border:0;border-radius:12px;padding:10px 26px;font-weight:800;font-size:14px">Aceptar</button></div>';d.querySelector('div div:nth-child(2)').textContent=String(m);d.querySelector('button').onclick=function(){d.remove()};(document.body||document.documentElement).appendChild(d);}catch(e){}};
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mr Santos - Tienda online con envíos a toda Venezuela</title>
+<title>Sigan Probando - Tienda online con envíos a toda Venezuela</title>
 <link rel="icon" type="image/png" href="favicon-ms.png">
 <link rel="apple-touch-icon" href="favicon-ms.png">
-<meta name="description" content="Mr Santos: gorras, franelas, calzado, gafas y más. Envíos a toda Venezuela por MRW, Domesa y Tealca, cobro a destino.">
+<meta name="description" content="Sigan Probando: gorras, franelas, calzado, gafas y más. Envíos a toda Venezuela por MRW, Domesa y Tealca, cobro a destino.">
 <meta name="theme-color" content="#0a0907">
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -61,7 +61,7 @@ width: 100%;
 min-width: 100%;
 box-sizing: border-box;
 }
-/* ===== TEMA LUJO Mr Santos (negro y oro) ===== */
+/* ===== TEMA LUJO Sigan Probando (negro y oro) ===== */
 :root{--oro1:#F5D77A;--oro2:#D4AF37;--oro3:#9C7A1C;--naranja:#F57C00;--oro-borde:rgba(212,175,55,.28);}
 body{background:radial-gradient(1200px 600px at 50% -10%,rgba(212,175,55,.10),transparent 60%),radial-gradient(800px 500px at 100% 100%,rgba(245,124,0,.07),transparent 60%),#0a0907 !important;}
 h1,h2,h3{letter-spacing:.01em}
@@ -131,7 +131,7 @@ nav[aria-label="Navegación inferior"] button::after{display:none}
 <h3 class="text-white font-bold text-base flex items-center justify-center gap-2">
 <i data-lucide="qr-code" class="w-5 h-5 text-amber-400"></i> Escanea para descargar
 </h3>
-<p class="text-xs text-gray-400">Apunta con la cámara de tu teléfono para descargar la app de Mr Santos.</p>
+<p class="text-xs text-gray-400">Apunta con la cámara de tu teléfono para descargar la app de Sigan Probando.</p>
 <!-- Contenedor donde se dibuja el QR -->
 <div id="contenedor-qr" class="bg-white p-4 rounded-xl flex items-center justify-center mx-auto w-fit"></div>
 <button onclick="cerrarModalQr()" class="w-full bg-amber-400 text-black font-bold py-2.5 rounded-xl text-xs hover:bg-amber-300 transition-colors cursor-pointer">
@@ -146,7 +146,7 @@ Cerrar
 <i data-lucide="x" class="w-5 h-5"></i>
 </button>
 <div class="text-center space-y-2">
-<img src="logo-mrsantos.jpg" alt="Mr Santos" class="registro-logo w-28 h-28 mx-auto rounded-3xl object-cover">
+<img src="logo-mrsantos.jpg" alt="Sigan Probando" class="registro-logo w-28 h-28 mx-auto rounded-3xl object-cover">
 <h2 class="text-xl font-extrabold text-white tracking-tight">¡REGISTRO OBLIGATORIO VIP!</h2>
 <p class="text-xs text-gray-400">Debes ingresar tus datos obligatoriamente para poder continuar y guardar tu progreso.</p>
 </div>
@@ -175,7 +175,7 @@ Cerrar
 <button type="button" id="btn-registro-guardar" onclick="registrarClienteUnico(event)" class="w-full bg-white hover:bg-gray-200 text-black font-bold py-4 rounded-xl text-xs uppercase tracking-widest cursor-pointer shadow-lg transition-all">
 GUARDAR Y CONTINUAR 🚀
 </button>
-<p class="text-[10px] text-center text-gray-500 leading-relaxed">Al continuar aceptas los <a href="https://mrsantos-ve.github.io/dunig7/terminos.html" target="_blank" rel="noopener" class="underline text-amber-400">Términos y Condiciones y la Política de privacidad</a> de Mr Santos.</p>
+<p class="text-[10px] text-center text-gray-500 leading-relaxed">Al continuar aceptas los <a href="https://mrsantos-ve.github.io/dunig7/terminos.html" target="_blank" rel="noopener" class="underline text-amber-400">Términos y Condiciones y la Política de privacidad</a> de Sigan Probando.</p>
 </div>
 </div>
 </div>
@@ -236,7 +236,7 @@ GUARDAR Y CONTINUAR 🚀
 <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1000&auto=format&fit=crop" alt="Banner 1" class="w-full h-full object-cover opacity-75">
 <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent flex flex-col justify-end p-4 space-y-1">
 <span class="text-[9px] bg-white/20 backdrop-blur-md px-2.5 py-0.5 rounded-full w-max font-bold uppercase tracking-widest text-amber-400">Exclusivo VIP</span>
-<h2 class="text-lg sm:text-2xl font-extrabold tracking-tight uppercase lux-gold-text">Mr Santos</h2>
+<h2 class="text-lg sm:text-2xl font-extrabold tracking-tight uppercase lux-gold-text">Sigan Probando</h2>
 <p class="text-[11px] text-gray-300">Tu tienda preferida, con envíos a toda Venezuela.</p>
 </div>
 </div>
@@ -515,7 +515,7 @@ document.getElementById('bloque-region').classList.toggle('hidden', esEntregaLoc
 window.usarMiUbicacion = function() {
 if (!navigator.geolocation) { alert("Tu teléfono no permite compartir la ubicación desde aquí. Pega el enlace de Google Maps."); return; }
 const poner = pos => { const { latitude, longitude } = pos.coords; document.getElementById('input-ubicacion-maps').value = `https://maps.google.com/?q=${latitude.toFixed(6)},${longitude.toFixed(6)}`; };
-const fallo = err => { if (err && err.code === 1) alert("Activa el permiso de ubicación para Mr Santos (y el GPS del teléfono) y vuelve a tocar el botón. También puedes pegar el enlace de Google Maps."); else alert("No pudimos leer tu ubicación. Revisa que el GPS esté encendido o pega el enlace de Google Maps."); };
+const fallo = err => { if (err && err.code === 1) alert("Activa el permiso de ubicación para Sigan Probando (y el GPS del teléfono) y vuelve a tocar el botón. También puedes pegar el enlace de Google Maps."); else alert("No pudimos leer tu ubicación. Revisa que el GPS esté encendido o pega el enlace de Google Maps."); };
 navigator.geolocation.getCurrentPosition(poner, err => { if (err && err.code === 1) return fallo(err); navigator.geolocation.getCurrentPosition(poner, fallo, { enableHighAccuracy: false, timeout: 20000, maximumAge: 600000 }); }, { enableHighAccuracy: true, timeout: 12000 });
 }
 async function cargarEmpresasEncomiendaSupabase() {
@@ -662,7 +662,7 @@ try {
 await fetch(SUPABASE_CENTRAL_URL, {
 method: "POST",
 headers: { "Content-Type": "application/json", "apikey": SUPABASE_CENTRAL_KEY, "Authorization": `Bearer ${SUPABASE_CENTRAL_KEY}`, "Prefer": "return=representation" },
-body: JSON.stringify({ comercio: nuevaOrden.nombre || "Mr Santos", comercio_nombre: nuevaOrden.nombre || "Mr Santos", comercio_direccion: "HVX5+G5H, Mérida", productos: nuevaOrden.detalles || "Pedido", costo_delivery: 0.00, coordenadas_gps: "N/A", estado: "Pendiente" })
+body: JSON.stringify({ comercio: nuevaOrden.nombre || "Sigan Probando", comercio_nombre: nuevaOrden.nombre || "Sigan Probando", comercio_direccion: "HVX5+G5H, Mérida", productos: nuevaOrden.detalles || "Pedido", costo_delivery: 0.00, coordenadas_gps: "N/A", estado: "Pendiente" })
 });
 } catch (error) {}
 }
@@ -1039,7 +1039,7 @@ wsNum = data.valor.replace(/[^0-9]/g, "");
 }
 } catch (err) {}
 let mensajeMesaExtra = metodo === 'efectivo' ? `📝 *OBSERVACIÓN EFECTIVO:* ${numeroMesa}\n` : '';
-const mensaje = `🍬 *NUEVO PEDIDO - MR SANTOS* 🍬\n\n👤 *CLIENTE:* ${clienteLocal.nombre || 'N/A'}\n📱 *WHATSAPP:* ${clienteLocal.whatsapp || 'N/A'}\n🎁 *REF. CLIENTE:* ${codigoReferidoCliente}\n\n${lista}\n\n💵 *TOTAL PRODUCTOS:* $${totalGeneral.toFixed(2)}\n📍 *DESTINO:* ${paisVal.toUpperCase()} / ${ciudadVal.toUpperCase()} / ${regionVal.toUpperCase()}\n${esEntregaLocal ? `🛵 *ENTREGA:* Delivery en ${CIUDAD_LOCAL}\n🗺️ *UBICACIÓN:* ${ubicacionMaps}\n` : `🚚 *AGENCIA DE ENCOMIENDA:* ${empresaEncomiendaSeleccionada} (Cobro a Destino)\n`}🏦 *MÉTODO DE Pago:* ${metodo.toUpperCase()}\n${mensajeMesaExtra}🔢 *REF:* ${ref}`;
+const mensaje = `🍬 *NUEVO PEDIDO - SIGAN PROBANDO* 🍬\n\n👤 *CLIENTE:* ${clienteLocal.nombre || 'N/A'}\n📱 *WHATSAPP:* ${clienteLocal.whatsapp || 'N/A'}\n🎁 *REF. CLIENTE:* ${codigoReferidoCliente}\n\n${lista}\n\n💵 *TOTAL PRODUCTOS:* $${totalGeneral.toFixed(2)}\n📍 *DESTINO:* ${paisVal.toUpperCase()} / ${ciudadVal.toUpperCase()} / ${regionVal.toUpperCase()}\n${esEntregaLocal ? `🛵 *ENTREGA:* Delivery en ${CIUDAD_LOCAL}\n🗺️ *UBICACIÓN:* ${ubicacionMaps}\n` : `🚚 *AGENCIA DE ENCOMIENDA:* ${empresaEncomiendaSeleccionada} (Cobro a Destino)\n`}🏦 *MÉTODO DE Pago:* ${metodo.toUpperCase()}\n${mensajeMesaExtra}🔢 *REF:* ${ref}`;
 // Generación de UUID único obligatorio para el campo id (text)
 const generatedId = 'ord-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7);
 // Inserción completa y corregida en Supabase con todos los campos requeridos
@@ -1065,7 +1065,7 @@ if (insertError) {
 console.error("Error al registrar en ordenes_vip:", insertError.message);
 }
 await guardarOrdenEnCentral({
-nombre: esEntregaLocal ? `Mr Santos - Delivery en ${CIUDAD_LOCAL}` : `Mr Santos - Envío por ${empresaEncomiendaSeleccionada}`,
+nombre: esEntregaLocal ? `Sigan Probando - Delivery en ${CIUDAD_LOCAL}` : `Sigan Probando - Envío por ${empresaEncomiendaSeleccionada}`,
 detalles: carrito.map(i => i.titulo).join(', ')
 });
 carrito = [];
@@ -1094,7 +1094,7 @@ document.addEventListener('pointerout',function(e){var t=e.target.closest&&e.tar
 })();
 </script>
 <script>
-// App Android Mr Santos: tomar el número de la SIM con Google (Phone Number Hint)
+// App Android Sigan Probando: tomar el número de la SIM con Google (Phone Number Hint)
 (function(){
   function plugin(){ try { return window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform() && Capacitor.Plugins && Capacitor.Plugins.PhoneHint; } catch(e){ return null; } }
   window.pedirNumeroTelefono = async function(){

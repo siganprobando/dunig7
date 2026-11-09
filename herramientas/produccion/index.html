@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Prueba de Producción · Mr Santos</title><meta name="theme-color" content="#0b0b0b">
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Prueba de Producción · Sigan Probando</title><meta name="theme-color" content="#0b0b0b">
 <style>
 :root{--negro:#0b0b0b;--panel:#151515;--borde:#2a2414;--oro:#d4af37;--oro2:#f3d77a;--texto:#eee;--gris:#a8a08a}
 *{box-sizing:border-box}
@@ -33,7 +33,7 @@ button.sec{background:transparent;border:1px solid var(--oro);color:var(--oro2)}
 .aviso{font-size:13px;color:var(--gris);margin-top:8px}
 .vacio{color:var(--gris);text-align:center;padding:10px}
 </style></head><body>
-<header><div class="marca">MR SANTOS</div><h1>Prueba de Producción</h1><p>Anota cada tanda y mira cuánto rinde 1 persona, 2 personas y el empacador.</p></header>
+<header><div class="marca">SIGAN PROBANDO</div><h1>Prueba de Producción</h1><p>Anota cada tanda y mira cuánto rinde 1 persona, 2 personas y el empacador.</p></header>
 <main>
 
 <div class="card">
@@ -140,7 +140,7 @@ function pintar(){
   if(b.dataset.t)D.tandas=D.tandas.filter(t=>t.id!=b.dataset.t);else D.empaque=D.empaque.filter(e=>e.id!=b.dataset.e);save();pintar();});}
 
 $('compartir').onclick=()=>{const c=calc();if(!c){alert('Todavía no hay datos.');return;}
- const txt=`Prueba de producción Mr Santos\nTandas: ${c.T.length}\nGomitas por hora (1 persona): ${f(c.gh)}\n1 persona: ${f(c.uno)} bolsitas/día\n2 personas: ${f(c.dos)} bolsitas/día\nSemana (6 días): ${f(c.dos*6)} bolsitas\n`+(c.emp?`1 empacador: ${f(c.emp)} bolsitas/día\nEmpacadores necesarios: ${c.empNec}\n`:'')+`Dañadas: ${f(c.merma,1)} %`;
+ const txt=`Prueba de producción Sigan Probando\nTandas: ${c.T.length}\nGomitas por hora (1 persona): ${f(c.gh)}\n1 persona: ${f(c.uno)} bolsitas/día\n2 personas: ${f(c.dos)} bolsitas/día\nSemana (6 días): ${f(c.dos*6)} bolsitas\n`+(c.emp?`1 empacador: ${f(c.emp)} bolsitas/día\nEmpacadores necesarios: ${c.empNec}\n`:'')+`Dañadas: ${f(c.merma,1)} %`;
  (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>alert('Resumen copiado ✔ Pégalo en WhatsApp o aquí en el chat.')).catch(()=>prompt('Copia este resumen:',txt));};
 
 pintarCronos();pintar();
