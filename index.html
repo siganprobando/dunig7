@@ -201,7 +201,7 @@ input[type=checkbox]{width:18px;height:18px;margin:0;padding:0;accent-color:#ffd
 <span class="kicker"><b></b> Sigan Probando · tienda al detal</span>
 <h1>Gomitas artesanales<br><span class="gtxt">hechas a mano</span></h1>
 <p class="lead">Bolsitas de 80 g con gomitas de muñequitos en cinco sabores. Despachamos desde Valencia: delivery en Valencia y envíos a toda Venezuela por MRW, Domesa y Tealca.</p>
-<div class="ctas"><a class="btn" href="#catalogo">🛍️ Ver catálogo</a><a class="btn ghost" href="#mayor">💼 Quiero vender</a></div>
+<div class="ctas"><a class="btn" href="#catalogo">🛍️ Ver catálogo</a><a class="btn ghost" href="#mayor">💼 Quiero vender</a><a class="btn ghost" href="#recetario">📖 Hazlos tú</a></div>
 
 </div>
 </header>
@@ -242,6 +242,88 @@ input[type=checkbox]{width:18px;height:18px;margin:0;padding:0;accent-color:#ffd
 <div class="sh reveal"><span class="kicker"><b></b> Para emprendedores</span><h2>Compra <span class="gtxt">al mayor</span></h2><p>Revende cada bolsita y gana. Se agrega a la misma bolsa y pagas igual que al detal.</p></div>
 <div class="prods" id="prods-mayor"></div>
 <p class="note">Bolsitas de 80 g. Ganancias calculadas revendiendo al precio sugerido.</p>
+</div></section>
+
+<section id="recetario" class="rcx"><div class="wrap">
+<style>
+.rcx{position:relative;overflow:hidden}
+.rcx .sh p{max-width:640px;margin-left:auto;margin-right:auto}
+.rc-hero{position:relative;border-radius:28px;overflow:hidden;border:1px solid rgba(255,210,63,.35);box-shadow:0 30px 80px rgba(0,0,0,.55),0 0 60px rgba(255,190,0,.12);min-height:560px;display:flex;align-items:flex-end;margin-bottom:26px}
+.rc-hero video,.rc-st video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.rc-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,7,10,0) 25%,rgba(7,7,10,.72) 62%,rgba(7,7,10,.96))}
+.rc-hero .in{position:relative;z-index:2;padding:28px 24px 26px;width:100%}
+.rc-hero h3{font-size:clamp(26px,6vw,40px);font-weight:800;line-height:1.08;margin:8px 0 10px}
+.rc-hero p{color:#ece6d6;line-height:1.55;max-width:560px}
+.rc-nums{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.rc-nums span{padding:9px 14px;border-radius:999px;background:rgba(255,210,63,.12);border:1px solid rgba(255,210,63,.45);color:var(--g1);font-weight:700;font-size:13px;backdrop-filter:blur(6px)}
+.rc-live{display:inline-flex;align-items:center;gap:7px;font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.55);padding:6px 11px;border-radius:999px}
+.rc-live i{width:8px;height:8px;border-radius:50%;background:#ff3b3b;box-shadow:0 0 10px #ff3b3b;animation:rcpulse 1.4s infinite}
+@keyframes rcpulse{50%{opacity:.25}}
+.rc-steps{display:grid;gap:14px;grid-template-columns:1fr;margin-bottom:26px}
+@media(min-width:760px){.rc-steps{grid-template-columns:repeat(3,1fr)}}
+.rc-st{position:relative;border-radius:22px;overflow:hidden;aspect-ratio:3/4;border:1px solid var(--line);transition:transform .35s ease,box-shadow .35s ease}
+.rc-st:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 30px rgba(255,190,0,.15)}
+.rc-st:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(7,7,10,.93))}
+.rc-st .cap{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:18px}
+.rc-st .n{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--g1),var(--g3));color:#120d00;font-weight:800;margin-bottom:8px}
+.rc-st h3{font-size:19px;font-weight:700;margin-bottom:6px}
+.rc-st p{font-size:14px;color:#e2dccb;line-height:1.5}
+.rc-buy{display:grid;gap:22px;align-items:center;background:linear-gradient(160deg,rgba(255,210,63,.10),rgba(20,20,27,.9) 55%);border:1px solid rgba(255,210,63,.4);border-radius:28px;padding:26px 22px}
+@media(min-width:800px){.rc-buy{grid-template-columns:1.2fr 1fr;padding:34px}}
+.rc-buy ul{list-style:none;padding:0;margin:0;display:grid;gap:11px}
+.rc-buy li{display:flex;gap:10px;align-items:flex-start;line-height:1.45;color:#eee8d8}
+.rc-buy li b{color:#fff}
+.rc-buy li:before{content:"✓";flex:0 0 24px;height:24px;border-radius:50%;display:grid;place-items:center;background:rgba(255,210,63,.18);color:var(--g2);font-weight:800;font-size:13px}
+.rc-price{text-align:center}
+.rc-price .old{color:var(--mut);font-size:14px}
+.rc-price .big{font-size:64px;font-weight:800;line-height:1;margin:6px 0}
+.rc-price .sub{color:#e6e1d3;font-size:14px;margin-bottom:18px}
+.rc-price .btn{width:100%;justify-content:center;font-size:17px;padding:16px 20px;animation:rcglow 2.4s ease-in-out infinite}
+@keyframes rcglow{50%{box-shadow:0 0 34px rgba(255,200,0,.55)}}
+.rc-price small{display:block;color:var(--mut);margin-top:12px;line-height:1.5}
+.rc-ia{font-size:12px;color:var(--mut);text-align:center;margin-top:14px}
+@media(prefers-reduced-motion:reduce){.rc-price .btn,.rc-live i{animation:none}}
+</style>
+
+<div class="sh reveal"><span class="kicker"><b></b> Para quienes quieren emprender</span><h2>Hazlos tú <span class="gtxt">y véndelos</span></h2><p>¿Prefieres preparar tus propios postres y venderlos en tu zona? Te doy las mismas recetas con las que yo arranqué: probadas, con ingredientes de abasto y con los números claros para que cada porción te deje ganancia.</p></div>
+
+<div class="rc-hero reveal">
+<video autoplay muted loop playsinline preload="metadata" poster="recetario/portada.jpg"><source src="recetario/portada.mp4" type="video/mp4"></video>
+<div class="in">
+<span class="rc-live"><i></i> Recetario Sigan Probando</span>
+<h3>500 postres latinoamericanos <span class="gtxt">listos para vender</span></h3>
+<p>Del quesillo al tres leches, de la marquesa al pie de limón: diez recetarios en una sola colección para que cocines con confianza y vendas desde el primer día.</p>
+<div class="rc-nums"><span>500 recetas</span><span>10 recetarios</span><span>874 páginas</span><span>Calculadora de precios</span></div>
+</div>
+</div>
+
+<div class="rc-steps">
+<div class="rc-st reveal"><video autoplay muted loop playsinline preload="metadata" poster="recetario/prepara.jpg"><source src="recetario/prepara.mp4" type="video/mp4"></video><div class="cap"><span class="n">1</span><h3>Prepara sin complicarte</h3><p>Una receta por página, con ingredientes, cantidades y paso a paso fáciles de seguir desde el teléfono.</p></div></div>
+<div class="rc-st reveal"><video autoplay muted loop playsinline preload="metadata" poster="recetario/desmolda.jpg"><source src="recetario/desmolda.mp4" type="video/mp4"></video><div class="cap"><span class="n">2</span><h3>Que salga perfecto</h3><p>Trucos para desmoldar, cortar parejo y presentar cada postre para que se vea irresistible.</p></div></div>
+<div class="rc-st reveal"><video autoplay muted loop playsinline preload="metadata" poster="recetario/vende.jpg"><source src="recetario/vende.mp4" type="video/mp4"></video><div class="cap"><span class="n">3</span><h3>Cobra lo justo y gana</h3><p>Calculadora de precios incluida para saber cuánto te cuesta cada porción y cuánto cobrar.</p></div></div>
+</div>
+
+<div class="rc-buy reveal">
+<div>
+<h3 style="font-size:22px;font-weight:800;margin-bottom:14px">Todo lo que recibes</h3>
+<ul>
+<li><span><b>500 recetas</b> de postres de 10 países de Latinoamérica.</span></li>
+<li><span>Un recetario especial de <b>postres para vender</b>, pensado para emprender desde casa.</span></li>
+<li><span><b>Calculadora de precios</b> para fijar tu ganancia sin adivinar.</span></li>
+<li><span>Consejos de venta, conservación y presentación en cada receta.</span></li>
+<li><span>Formato digital: léelo en tu teléfono, tablet o computadora.</span></li>
+</ul>
+</div>
+<div class="rc-price">
+<div class="old">Colección completa · 10 recetarios</div>
+<div class="big gtxt">$7</div>
+<div class="sub">Un solo pago. Es tuyo para siempre.</div>
+<a class="btn" href="https://dunigshop.github.io/dunigoficial8/" target="_blank" rel="noopener">📖 Quiero mi recetario</a>
+<small>Pagas seguro con PayPal y lo recibes en tu correo.<br>¿No tienes PayPal? Escríbeme <b>RECETARIO</b> por mensaje en TikTok <a href="https://www.tiktok.com/@sigan.probando" target="_blank" rel="noopener" style="color:var(--g2)">@sigan.probando</a>.</small>
+</div>
+</div>
+<p class="reveal" style="text-align:center;font-size:clamp(22px,5vw,32px);font-weight:800;margin-top:30px">Si sale mal, lo intentas otra vez.<br><span class="gtxt">Sigan probando</span> ☺️</p>
+<p class="rc-ia">Videos ilustrativos hechos con IA.</p>
 </div></section>
 
 <footer><div class="wrap">
