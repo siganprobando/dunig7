@@ -46,12 +46,12 @@ Ingresar al Panel
 <div class="flex items-center space-x-4">
 <div class="border border-amber-500/30 p-3 rounded-xl bg-stone-950/80 glow-gold"><i data-lucide="terminal" class="w-7 h-7 text-amber-400"></i></div>
 <div>
-<h1 class="text-2xl font-black tracking-[0.2em] text-white font-futurista">MR <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">SANTOS</span></h1>
+<h1 class="text-2xl font-black tracking-[0.2em] text-white font-futurista">SIGAN <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-500">PROBANDO</span></h1>
 <p class="text-[9px] text-amber-500/70 uppercase tracking-[0.3em] font-bold font-futurista">PANEL DE CONTROL</p>
 </div>
 </div>
 <div class="flex flex-col gap-1.5 items-end">
-<a href="https://mrsantos-ve.github.io/dunig7/v2/" target="_blank" class="px-2.5 py-1.5 rounded-lg border border-stone-800 text-stone-400 hover:text-white transition-all text-[10px] font-bold uppercase tracking-wider font-futurista bg-stone-900/30 flex items-center gap-1.5 cursor-pointer">
+<a href="https://siganprobando.github.io/dunig7/v2/" target="_blank" class="px-2.5 py-1.5 rounded-lg border border-stone-800 text-stone-400 hover:text-white transition-all text-[10px] font-bold uppercase tracking-wider font-futurista bg-stone-900/30 flex items-center gap-1.5 cursor-pointer">
 <i data-lucide="eye" class="w-3.5 h-3.5 text-amber-500"></i> Ver Vitrina
 </a>
 <button onclick="ejecutarLogout()" class="px-2.5 py-1.5 rounded-lg border border-red-900/30 text-red-400 hover:text-red-300 transition-all text-[10px] font-bold uppercase tracking-wider font-futurista bg-stone-900/30 flex items-center gap-1.5 cursor-pointer">
@@ -1106,7 +1106,7 @@ return;
 }
 }
 const numeroLimpio = telefonoCliente.replace(/[^0-9]/g, "");
-const linkCuponera = "https://mrsantos-ve.github.io/cuponera/cuponera.html";
+const linkCuponera = "https://siganprobando.github.io/cuponera/cuponera.html";
 const mensaje = `¡Hola! Tu orden VIP #${idOrden} ha sido *verificada y confirmada* con éxito. 🎉\n\nTu código exclusivo para el sorteo y acceso a la cuponera es:\n📌 *${codigoPremio}*\n\n🎟️ *Ingresa a nuestra cuponera aquí:* \n${linkCuponera}\n\n¡Guarda muy bien este código para participar y desbloquear tus beneficios! Gracias por tu compra.`;
 const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroLimpio}&text=${encodeURIComponent(mensaje)}`;
 window.open(urlWhatsApp, '_blank');
@@ -1118,7 +1118,7 @@ alert("Error: Número de teléfono no válido.");
 return;
 }
 const numeroLimpio = telefono.replace(/[^0-9]/g, "");
-const linkCuponera = "https://mrsantos-ve.github.io/cuponera/cuponera.html";
+const linkCuponera = "https://siganprobando.github.io/cuponera/cuponera.html";
 const mensaje = `¡Hola! Tu orden VIP #${idOrden} ha sido verificada y confirmada con éxito. 🎉\n\nTu código exclusivo para el sorteo y acceso a la cuponera es:\n📌 *${codigo}*\n\n🎟️ *Ingresa a nuestra cuponera aquí:* \n${linkCuponera}\n\n¡Guarda muy bien este código para participar y desbloquear tus beneficios! Gracias por tu compra.`;
 const urlWhatsApp = `https://api.whatsapp.com/send?phone=${numeroLimpio}&text=${encodeURIComponent(mensaje)}`;
 window.open(urlWhatsApp, '_blank');
@@ -1314,7 +1314,7 @@ const { error } = await supabaseClient.from('promotores').update({ activo: !p.ac
 if (error) alert(plErrorTabla(error)); else plCargarPromotores();
 }
 function plCopiarEnlace(codigo) {
-const url = 'https://mrsantos-ve.github.io/dunig7/v2/?ref=' + encodeURIComponent(codigo);
+const url = 'https://siganprobando.github.io/dunig7/v2/?ref=' + encodeURIComponent(codigo);
 if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => alert('Enlace copiado:\n' + url), () => prompt('Copia el enlace:', url));
 else prompt('Copia el enlace:', url);
 }
