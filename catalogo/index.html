@@ -36,6 +36,19 @@ h2{font-family:Georgia,serif;color:var(--cafe);font-size:1.7rem;margin:10px 0 14
 footer{text-align:center;padding:24px 16px 40px;font-size:.9rem;color:#6b5a4d}
 footer small{display:block;margin-top:6px;font-size:.75rem}
 #estado{color:#6b5a4d;padding:20px 0}
+#bot-btn{position:fixed;right:16px;bottom:16px;z-index:50;background:var(--cafe);color:#fff;border:0;border-radius:30px;padding:13px 18px;font-weight:700;font-size:1rem;box-shadow:0 6px 18px rgba(0,0,0,.25);cursor:pointer}
+#bot{position:fixed;right:12px;bottom:76px;z-index:51;width:min(360px,calc(100vw - 24px));max-height:70vh;background:#fff;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);display:none;flex-direction:column;overflow:hidden}
+#bot.open{display:flex}
+#bot .top{background:var(--cafe);color:#fff;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-weight:700}
+#bot .top button{background:none;border:0;color:#fff;font-size:1.4rem;cursor:pointer;line-height:1}
+#bot .msgs{padding:12px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;flex:1;background:var(--crema)}
+.m{max-width:85%;padding:9px 12px;border-radius:14px;font-size:.93rem;line-height:1.4}
+.m.b{background:#fff;align-self:flex-start;border-bottom-left-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.m.u{background:var(--dorado);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+#bot .ops{padding:10px 12px;display:flex;flex-wrap:wrap;gap:6px;border-top:1px solid #eee}
+#bot .ops button{border:1.5px solid var(--cafe);background:#fff;color:var(--cafe);border-radius:16px;padding:6px 10px;font-size:.85rem;font-weight:600;cursor:pointer}
+#bot .ops a{width:100%;justify-content:center;margin-top:4px;padding:10px}
+
 </style>
 </head>
 <body>
@@ -67,6 +80,14 @@ footer small{display:block;margin-top:6px;font-size:.75rem}
   Página de ejemplo — Diseño web por David · Sigan Probando
   <small>El negocio, el número de WhatsApp, el Instagram y los precios son ficticios. Los productos se cargan desde una hoja de Google.</small>
 </footer>
+
+<button id="bot-btn" aria-label="Abrir asistente">💬 ¿Tienes dudas?</button>
+<div id="bot" role="dialog" aria-label="Asistente">
+  <div class="top"><span>Asistente · Respuestas rápidas</span><button id="bot-x" aria-label="Cerrar">×</button></div>
+  <div class="msgs" id="bot-msgs"></div>
+  <div class="ops"><div id="bot-ops" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+  <a class="btn" id="bot-wa" target="_blank" rel="noopener">💬 Escribir por WhatsApp</a></div>
+</div>
 
 <script>
 // ===== CONFIGURACIÓN: solo cambia estas dos líneas para otro negocio =====
@@ -119,6 +140,31 @@ gv("Config").then(t=>{
    productos=rs.filter(r=>r[0]).map(r=>({nombre:r[0],desc:r[1]||"",precio:r[2]||"",cat:r[3]||"",foto:r[4]||"",ok:(r[5]||"SI").trim().toUpperCase()!="NO"}));
    document.getElementById("estado").remove();pintar();
  }).catch(()=>{document.getElementById("estado").textContent="No se pudieron cargar los productos. Intenta de nuevo en un momento."});
+
+// ===== ASISTENTE: preguntas y respuestas desde la pestaña "Respuestas" =====
+let faqs=[
+ ["¿Cuál es el horario?","Atendemos de lunes a sábado, de 8:00 am a 6:00 pm."],
+ ["¿Cómo hago un pedido?","Elige tu producto y toca «Pedir por WhatsApp»."]
+];
+const msgs=document.getElementById("bot-msgs"),bot=document.getElementById("bot");
+function burbuja(t,quien){const d=document.createElement("div");d.className="m "+quien;d.textContent=t;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight}
+function opciones(){
+  document.getElementById("bot-wa").href=wa("Hola, quiero más información");
+  document.getElementById("bot-ops").innerHTML=faqs.map((f,i)=>`<button data-i="${i}">${esc(f[0])}</button>`).join("");
+  document.querySelectorAll("#bot-ops button").forEach(b=>b.onclick=()=>{
+    const f=faqs[b.dataset.i];burbuja(f[0],"u");
+    setTimeout(()=>{burbuja(f[1],"b");burbuja("¿Quieres más información? Escríbenos por WhatsApp y te atendemos directo.","b")},350);
+  });
+}
+let saludado=false;
+document.getElementById("bot-btn").onclick=()=>{bot.classList.toggle("open");
+  if(!saludado){saludado=true;burbuja("¡Hola! 👋 Toca una pregunta y te respondo al instante. Si necesitas algo más, escríbenos por WhatsApp.","b")}
+  opciones();};
+document.getElementById("bot-x").onclick=()=>bot.classList.remove("open");
+gv("Respuestas").then(t=>{
+  const rs=parseCSV(t.trim()).slice(1).filter(r=>(r[0]||"").trim()&&(r[1]||"").trim()).map(r=>[r[0].trim(),r[1].trim()]);
+  if(rs.length) faqs=rs; opciones();
+}).catch(()=>opciones());
 </script>
 </body>
 </html>
