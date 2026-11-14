@@ -152,7 +152,7 @@ function pintarCarro(){
   const nota=$("nota").value.trim();
   $("enviar").href=wa((MESA?"🍽️ PEDIDO MESA "+MESA:"🛍️ NUEVO PEDIDO")+"\n"+lineas+"\nTotal: $"+tot.toFixed(2).replace(/\.00$/,"")+(nota?"\nNota: "+nota:""));
   const msg=(MESA?"🍽️ PEDIDO MESA "+MESA:"🛍️ NUEVO PEDIDO")+"\n"+lineas+"\nTotal: $"+tot.toFixed(2).replace(/\.00$/,"")+(nota?"\nNota: "+nota:"");
-  $("enviar-cocina").href="https://wa.me/"+COCINA+"?text="+encodeURIComponent("👨‍🍳 COCINA · "+(MESA?"MESA "+MESA:"PEDIDO PARA LLEVAR")+"\n"+lineas+(nota?"\nNota: "+nota:""));
+  $("enviar-cocina").href="https://wa.me/"+COCINA+"?text="+encodeURIComponent("👨‍🍳 COCINA · "+(MESA?"MESA "+MESA:"PEDIDO DELIVERY")+"\n"+lineas+(nota?"\nNota: "+nota:""));
   $("enviar").textContent=COCINA?"💬 Paso 1: enviar pedido":(MESA?"💬 Enviar pedido a la cocina":"💬 Enviar pedido por WhatsApp");
 }
 $("carro-bar").onclick=()=>{pintarCarro();$("carro").classList.add("open")};
