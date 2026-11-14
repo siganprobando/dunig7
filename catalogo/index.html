@@ -71,7 +71,7 @@ footer small{display:block;margin-top:6px;font-size:.75rem}
 <script>
 // ===== CONFIGURACIÓN: solo cambia estas dos líneas para otro negocio =====
 const SHEET_ID = "1SkaZA4m6t6Ti7DRR4B7VbWyf49taEUTc_TKh-xkxX4Y";
-let WHATSAPP = "580000000000"; // respaldo; el número real se lee de la pestaña Config de la hoja
+let WHATSAPP = "580000000000", MSG_GENERAL = "Hola, quiero hacer un pedido", MSG_PRODUCTO = "Hola, quiero pedir: {producto}"; // respaldo; el número real se lee de la pestaña Config de la hoja
 // =========================================================================
 const wa = t => "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(t);
 document.getElementById("wa-top").href = wa("Hola, quiero hacer un pedido");
@@ -96,7 +96,7 @@ function pintar(){
       <img src="${esc(p.foto)}" alt="${esc(p.nombre)}" loading="lazy">
       <div class="b"><h3>${esc(p.nombre)}</h3><p>${esc(p.desc)}</p>
       <div class="price">$${esc(p.precio)}</div>
-      <a class="btn" target="_blank" rel="noopener" href="${wa("Hola, quiero pedir: "+p.nombre)}">${p.ok?"💬 Pedir por WhatsApp":"Agotado"}</a></div>
+      <a class="btn" target="_blank" rel="noopener" href="${wa(MSG_PRODUCTO.split("{producto}").join(p.nombre).split("{precio}").join("$"+p.precio))}">${p.ok?"💬 Pedir por WhatsApp":"Agotado"}</a></div>
     </div>`).join("");
   const cats=["Todos",...new Set(productos.map(p=>p.cat).filter(Boolean))];
   document.getElementById("chips").innerHTML=cats.map(c=>`<button class="chip ${c==filtro?"on":""}" data-c="${esc(c)}">${esc(c)}</button>`).join("");
@@ -110,9 +110,12 @@ gv("Config").then(t=>{
       let v=(r[1]||"").trim(); if(/e/i.test(v)) v=Number(v).toFixed(0);
       v=v.replace(/\D/g,""); if(v.length>=8) WHATSAPP=v;
     }
+    const k=(r[0]||"").trim().toLowerCase(), val=(r[1]||"").trim();
+    if(k=="mensaje general"&&val) MSG_GENERAL=val;
+    if(k=="mensaje producto"&&val) MSG_PRODUCTO=val;
   }
 }).catch(()=>{}).then(()=>{
-  document.getElementById("wa-top").href = wa("Hola, quiero hacer un pedido");
+  document.getElementById("wa-top").href = wa(MSG_GENERAL);
   return gv("Productos");
 }).then(t=>{
    const [h,...rs]=parseCSV(t.trim());
