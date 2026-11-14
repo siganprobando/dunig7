@@ -71,7 +71,7 @@ footer small{display:block;margin-top:6px;font-size:.75rem}
 <script>
 // ===== CONFIGURACIÓN: solo cambia estas dos líneas para otro negocio =====
 const SHEET_ID = "1SkaZA4m6t6Ti7DRR4B7VbWyf49taEUTc_TKh-xkxX4Y";
-const WHATSAPP = "580000000000"; // número del negocio, con código de país, sin +
+let WHATSAPP = "580000000000"; // respaldo; el número real se lee de la pestaña Config de la hoja
 // =========================================================================
 const wa = t => "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(t);
 document.getElementById("wa-top").href = wa("Hola, quiero hacer un pedido");
@@ -103,8 +103,18 @@ function pintar(){
   document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{filtro=b.dataset.c;pintar()});
 }
 
-fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=Productos&t=${Date.now()}`)
- .then(r=>r.text()).then(t=>{
+const gv = hoja => fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=${hoja}&t=${Date.now()}`).then(r=>r.text());
+gv("Config").then(t=>{
+  for(const r of parseCSV(t.trim()).slice(1)){
+    if((r[0]||"").trim().toLowerCase()=="whatsapp"){
+      let v=(r[1]||"").trim(); if(/e/i.test(v)) v=Number(v).toFixed(0);
+      v=v.replace(/\D/g,""); if(v.length>=8) WHATSAPP=v;
+    }
+  }
+}).catch(()=>{}).then(()=>{
+  document.getElementById("wa-top").href = wa("Hola, quiero hacer un pedido");
+  return gv("Productos");
+}).then(t=>{
    const [h,...rs]=parseCSV(t.trim());
    productos=rs.filter(r=>r[0]).map(r=>({nombre:r[0],desc:r[1]||"",precio:r[2]||"",cat:r[3]||"",foto:r[4]||"",ok:(r[5]||"SI").trim().toUpperCase()!="NO"}));
    document.getElementById("estado").remove();pintar();
