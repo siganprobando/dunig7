@@ -102,6 +102,7 @@ footer small{display:block;margin-top:6px;font-size:.75rem}
   <textarea id="nota" placeholder="Nota (ej: sin azúcar, para llevar…)"></textarea>
   <div class="tot" id="carro-tot"></div>
   <a class="btn" id="enviar" target="_blank" rel="noopener">💬 Enviar pedido por WhatsApp</a>
+  <a class="btn" id="enviar-cocina" target="_blank" rel="noopener" style="display:none;background:#e67e22">👨‍🍳 Paso 2: enviar a la cocina</a>
   <a class="btn sec" id="cuenta" target="_blank" rel="noopener" style="display:none">🧾 Pedir la cuenta</a>
 </div></div>
 <button id="bot-btn" aria-label="Abrir asistente">💬 ¿Tienes dudas?</button>
@@ -116,6 +117,7 @@ footer small{display:block;margin-top:6px;font-size:.75rem}
 // ===== CONFIGURACIÓN: solo cambia estas dos líneas para otro negocio =====
 const SHEET_ID = "1SkaZA4m6t6Ti7DRR4B7VbWyf49taEUTc_TKh-xkxX4Y";
 let WHATSAPP = "580000000000"; // respaldo; el número real se lee de la pestaña Config de la hoja
+let COCINA = ""; // "WhatsApp cocina" en la pestaña Config (opcional)
 // =========================================================================
 const wa = t => "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(t);
 const MESA = (new URLSearchParams(location.search).get("mesa")||"").replace(/[^\w -]/g,"").slice(0,12);
@@ -149,12 +151,15 @@ function pintarCarro(){
   const lineas=ks.map(k=>"• "+carro[k]+" x "+k).join("\n");
   const nota=$("nota").value.trim();
   $("enviar").href=wa((MESA?"🍽️ PEDIDO MESA "+MESA:"🛍️ NUEVO PEDIDO")+"\n"+lineas+"\nTotal: $"+tot.toFixed(2).replace(/\.00$/,"")+(nota?"\nNota: "+nota:""));
-  $("enviar").textContent=MESA?"💬 Enviar pedido a la cocina":"💬 Enviar pedido por WhatsApp";
+  const msg=(MESA?"🍽️ PEDIDO MESA "+MESA:"🛍️ NUEVO PEDIDO")+"\n"+lineas+"\nTotal: $"+tot.toFixed(2).replace(/\.00$/,"")+(nota?"\nNota: "+nota:"");
+  $("enviar-cocina").href="https://wa.me/"+COCINA+"?text="+encodeURIComponent("👨‍🍳 COCINA · "+msg);
+  $("enviar").textContent=COCINA?"💬 Paso 1: enviar pedido":(MESA?"💬 Enviar pedido a la cocina":"💬 Enviar pedido por WhatsApp");
 }
 $("carro-bar").onclick=()=>{pintarCarro();$("carro").classList.add("open")};
 $("carro-x").onclick=()=>$("carro").classList.remove("open");
 $("carro").onclick=e=>{if(e.target.id=="carro")$("carro").classList.remove("open")};
 $("nota").oninput=pintarCarro;
+$("enviar").addEventListener("click",()=>{if(COCINA)setTimeout(()=>{$("enviar-cocina").style.display="flex"},400)});
 
 function parseCSV(txt){
   const rows=[];let row=[],cell="",q=false;
@@ -190,6 +195,10 @@ gv("Config").then(t=>{
     if((r[0]||"").trim().toLowerCase()=="whatsapp"){
       let v=(r[1]||"").trim(); if(/e/i.test(v)) v=Number(v).toFixed(0);
       v=v.replace(/\D/g,""); if(v.length>=8) WHATSAPP=v;
+    }
+    if((r[0]||"").trim().toLowerCase()=="whatsapp cocina"){
+      let v=(r[1]||"").trim(); if(/e/i.test(v)) v=Number(v).toFixed(0);
+      v=v.replace(/\D/g,""); if(v.length>=8) COCINA=v;
     }
   }
 }).catch(()=>{}).then(()=>{
