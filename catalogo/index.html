@@ -103,7 +103,7 @@ function pintar(){
   document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{filtro=b.dataset.c;pintar()});
 }
 
-fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Productos&t=${Date.now()}`)
+fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=Productos&t=${Date.now()}`)
  .then(r=>r.text()).then(t=>{
    const [h,...rs]=parseCSV(t.trim());
    productos=rs.filter(r=>r[0]).map(r=>({nombre:r[0],desc:r[1]||"",precio:r[2]||"",cat:r[3]||"",foto:r[4]||"",ok:(r[5]||"SI").trim().toUpperCase()!="NO"}));
