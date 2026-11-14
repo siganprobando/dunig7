@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dulcería Los Andes · Catálogo</title>
+<style>
+:root{--cafe:#5a3825;--crema:#fff8ef;--dorado:#d99a3d;--verde:#25d366}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--crema);color:#2b1d14}
+.hero{position:relative;min-height:62vh;display:flex;align-items:flex-end;background:url(hero.jpg) center/cover}
+.hero:before{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(30,15,5,.85),rgba(30,15,5,.1))}
+.hero-in{position:relative;padding:28px 20px;max-width:900px;margin:0 auto;width:100%;color:#fff}
+.hero h1{font-family:Georgia,serif;font-size:clamp(2rem,7vw,3.4rem)}
+.hero p{margin:8px 0 18px;font-size:1.1rem;opacity:.95}
+.tag{display:inline-block;background:rgba(255,255,255,.18);padding:4px 10px;border-radius:20px;font-size:.85rem;margin-bottom:10px}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--verde);color:#fff;text-decoration:none;font-weight:700;padding:12px 18px;border-radius:30px;border:0;cursor:pointer;font-size:1rem}
+main{max-width:900px;margin:0 auto;padding:28px 16px}
+h2{font-family:Georgia,serif;color:var(--cafe);font-size:1.7rem;margin:10px 0 14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.chip{border:1.5px solid var(--cafe);background:#fff;color:var(--cafe);padding:7px 14px;border-radius:20px;font-weight:600;cursor:pointer}
+.chip.on{background:var(--cafe);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+.card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 14px rgba(90,56,37,.12);display:flex;flex-direction:column}
+.card img{width:100%;aspect-ratio:1;object-fit:cover;background:#eee}
+.card .b{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card h3{font-size:1.05rem}
+.card p{font-size:.9rem;color:#6b5a4d;flex:1}
+.price{font-size:1.3rem;font-weight:800;color:var(--dorado)}
+.card .btn{justify-content:center;padding:10px;font-size:.92rem}
+.agotado{opacity:.55}.agotado .btn{background:#999;pointer-events:none}
+.steps{counter-reset:s;list-style:none;display:grid;gap:10px;margin-bottom:26px}
+.steps li{background:#fff;border-radius:12px;padding:14px 14px 14px 52px;position:relative}
+.steps li:before{counter-increment:s;content:counter(s);position:absolute;left:14px;top:12px;width:28px;height:28px;border-radius:50%;background:var(--dorado);color:#fff;font-weight:800;display:grid;place-items:center}
+.info{background:#fff;border-radius:12px;padding:16px;line-height:1.7;margin-bottom:26px}
+footer{text-align:center;padding:24px 16px 40px;font-size:.9rem;color:#6b5a4d}
+footer small{display:block;margin-top:6px;font-size:.75rem}
+#estado{color:#6b5a4d;padding:20px 0}
+</style>
+</head>
+<body>
+<header class="hero"><div class="hero-in">
+  <span class="tag">🚚 Delivery en Mérida y Ejido</span>
+  <h1>Dulcería Los Andes</h1>
+  <p>Postres caseros hechos en Mérida. Pide hoy, recibe mañana.</p>
+  <a class="btn" id="wa-top" target="_blank" rel="noopener">💬 Pide por WhatsApp</a>
+</div></header>
+
+<main>
+  <h2>Catálogo</h2>
+  <div class="chips" id="chips"></div>
+  <div id="estado">Cargando productos…</div>
+  <div class="grid" id="grid"></div>
+
+  <h2 style="margin-top:34px">Cómo pedir</h2>
+  <ol class="steps">
+    <li>Elige tu postre.</li>
+    <li>Toca “Pedir por WhatsApp”.</li>
+    <li>Confirma tu pago (Pago Móvil, Zelle o efectivo) y tu dirección.</li>
+  </ol>
+
+  <h2>Horario y contacto</h2>
+  <div class="info">🕗 Lunes a sábado, 8:00 am – 6:00 pm<br>📍 Ejido, Mérida<br>📸 Instagram @dulcerialosandes</div>
+</main>
+
+<footer>
+  Página de ejemplo — Diseño web por David · Sigan Probando
+  <small>El negocio, el número de WhatsApp, el Instagram y los precios son ficticios. Los productos se cargan desde una hoja de Google.</small>
+</footer>
+
+<script>
+// ===== CONFIGURACIÓN: solo cambia estas dos líneas para otro negocio =====
+const SHEET_ID = "1SkaZA4m6t6Ti7DRR4B7VbWyf49taEUTc_TKh-xkxX4Y";
+const WHATSAPP = "580000000000"; // número del negocio, con código de país, sin +
+// =========================================================================
+const wa = t => "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(t);
+document.getElementById("wa-top").href = wa("Hola, quiero hacer un pedido");
+
+function parseCSV(txt){
+  const rows=[];let row=[],cell="",q=false;
+  for(let i=0;i<txt.length;i++){const c=txt[i];
+    if(q){if(c=='"'){if(txt[i+1]=='"'){cell+='"';i++}else q=false}else cell+=c}
+    else if(c=='"')q=true;else if(c==','){row.push(cell);cell=""}
+    else if(c=='\n'){row.push(cell);rows.push(row);row=[];cell=""}
+    else if(c!='\r')cell+=c}
+  if(cell||row.length){row.push(cell);rows.push(row)}
+  return rows;
+}
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let productos=[],filtro="Todos";
+
+function pintar(){
+  const g=document.getElementById("grid");
+  g.innerHTML=productos.filter(p=>filtro=="Todos"||p.cat==filtro).map(p=>`
+    <div class="card ${p.ok?"":"agotado"}">
+      <img src="${esc(p.foto)}" alt="${esc(p.nombre)}" loading="lazy">
+      <div class="b"><h3>${esc(p.nombre)}</h3><p>${esc(p.desc)}</p>
+      <div class="price">$${esc(p.precio)}</div>
+      <a class="btn" target="_blank" rel="noopener" href="${wa("Hola, quiero pedir: "+p.nombre)}">${p.ok?"💬 Pedir por WhatsApp":"Agotado"}</a></div>
+    </div>`).join("");
+  const cats=["Todos",...new Set(productos.map(p=>p.cat).filter(Boolean))];
+  document.getElementById("chips").innerHTML=cats.map(c=>`<button class="chip ${c==filtro?"on":""}" data-c="${esc(c)}">${esc(c)}</button>`).join("");
+  document.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{filtro=b.dataset.c;pintar()});
+}
+
+fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=Productos&t=${Date.now()}`)
+ .then(r=>r.text()).then(t=>{
+   const [h,...rs]=parseCSV(t.trim());
+   productos=rs.filter(r=>r[0]).map(r=>({nombre:r[0],desc:r[1]||"",precio:r[2]||"",cat:r[3]||"",foto:r[4]||"",ok:(r[5]||"SI").trim().toUpperCase()!="NO"}));
+   document.getElementById("estado").remove();pintar();
+ }).catch(()=>{document.getElementById("estado").textContent="No se pudieron cargar los productos. Intenta de nuevo en un momento."});
+</script>
+</body>
+</html>
