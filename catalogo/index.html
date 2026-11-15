@@ -126,6 +126,7 @@ footer small{display:block;margin-top:6px;font-size:.75rem}
   <div id="datos" style="display:none"><input id="cli-nombre" placeholder="Tu nombre" class="campo"><input id="cli-tel" placeholder="Tu teléfono" inputmode="tel" class="campo"><button type="button" class="btn sec" id="gps-btn">📍 Marcar mi ubicación (GPS)</button><div id="gps-ok" style="margin:6px 0 8px;font-size:.9rem"></div><input id="cli-ref" placeholder="Referencia opcional (ej: casa azul, piso 2)" class="campo"></div>
   <button class="btn" id="enviar">✅ Enviar pedido</button>
   <div id="seguimiento" style="display:none"></div>
+  <button class="btn" id="llamar" style="display:none;width:100%;justify-content:center;margin:10px 0 0;background:var(--cafe)">🙋 Llamar al mesero</button>
   <button class="btn sec" id="cuenta" style="display:none">🧾 Pedir la cuenta</button>
 </div></div>
 <button id="bot-btn" aria-label="Abrir asistente">💬 ¿Tienes dudas?</button>
@@ -183,6 +184,11 @@ function verCuenta(id){
   }).catch(()=>{});
 }
 function esperarCuenta(id){ $("cuenta").disabled=true; $("cuenta").textContent="⏳ Esperando respuesta del mesero…"; clearInterval(cuentaInt); cuentaInt=setInterval(()=>verCuenta(id),5000); }
+$("llamar").onclick=()=>{
+  const b=$("llamar"); b.disabled=true; b.textContent="Llamando…";
+  enviarSistema({tipo:"mesonero",mesa:MESA}).then(()=>aviso("🙋 Listo, el mesero viene a tu mesa")).catch(e=>aviso("⚠️ "+e.message))
+   .finally(()=>setTimeout(()=>{b.disabled=false;b.textContent="🙋 Llamar al mesero"},8000));
+};
 $("cuenta").onclick=()=>{
   timbre(); // desbloquea el sonido en el teléfono
   enviarSistema({tipo:"cuenta",mesa:MESA}).then(r=>{
@@ -218,6 +224,13 @@ function pintarCarro(){
   $("carro-tot").textContent="Total: $"+tot.toFixed(2).replace(/\.00$/,"");
   ultimo={ks,tot};
   $("enviar").disabled=!ks.length;
+  const vacio=!ks.length;
+  $("nota").style.display=sigue?"none":"";
+  $("carro-tot").style.display=(sigue&&vacio)?"none":"";
+  $("enviar").style.display=(sigue&&vacio)?"none":"";
+  if(!MESA) $("datos").style.display=(sigue&&vacio)?"none":"block";
+  $("llamar").style.display=(sigue&&MESA)?"flex":"none";
+  if(sigue&&vacio) $("carro-items").innerHTML="";
 }
 let ultimo={ks:[],tot:0}, seguir=null;
 const PASOS=[
@@ -225,7 +238,7 @@ const PASOS=[
  ["en cocina","👨‍🍳 Preparando en cocina","Tu pedido ya se está preparando. No necesitas hacer nada."],
  ["listo",(MESA?"✅ Listo, ya va a tu mesa":"✅ Listo para salir"),(MESA?"El mesero lo está llevando a la Mesa "+MESA+".":"Tu pedido está listo y espera a un repartidor.")],
  ...(MESA?[]:[["en camino","🛵 En camino a tu dirección","El repartidor ya salió hacia la ubicación que marcaste. Ten tu teléfono a mano."]]),
- ["entregado",(MESA?"🍽️ Servido. ¡Buen provecho!":"🚚 Entregado. ¡Gracias!"),(MESA?"¿Quieres algo más? Agrégalo arriba. Cuando termines, toca «Pedir la cuenta».":"¡Gracias por tu compra! Puedes hacer otro pedido cuando quieras.")]];
+ ["entregado",(MESA?"🍽️ Servido. ¡Buen provecho!":"🚚 Entregado. ¡Gracias!"),(MESA?"¿Necesitas algo más? Toca «Llamar al mesero». Cuando termines, toca «Pedir la cuenta».":"¡Gracias por tu compra! Puedes hacer otro pedido cuando quieras.")]];
 let SG=null;
 function hace(t){const m=Math.floor((Date.now()-t)/60000);return m<1?"hace menos de 1 min":"hace "+m+" min";}
 function pintarSeguimiento(estado){
