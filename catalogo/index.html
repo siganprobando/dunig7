@@ -126,8 +126,8 @@ footer small{display:block;margin-top:6px;font-size:.75rem}
   <div id="datos" style="display:none"><input id="cli-nombre" placeholder="Tu nombre" class="campo"><input id="cli-tel" placeholder="Tu teléfono" inputmode="tel" class="campo"><button type="button" class="btn sec" id="gps-btn">📍 Marcar mi ubicación (GPS)</button><div id="gps-ok" style="margin:6px 0 8px;font-size:.9rem"></div><input id="cli-ref" placeholder="Referencia opcional (ej: casa azul, piso 2)" class="campo"></div>
   <button class="btn" id="enviar">✅ Enviar pedido</button>
   <div id="seguimiento" style="display:none"></div>
-  <button class="btn" id="llamar" style="display:none;width:100%;justify-content:center;margin:10px 0 0;background:var(--cafe)">🙋 Llamar al mesero</button>
-  <button class="btn sec" id="cuenta" style="display:none">🧾 Pedir la cuenta</button>
+  <div id="acum" style="display:none"></div>
+  <button class="btn sec" id="cuenta" style="display:none">🙋 Solicitar al mesero</button>
 </div></div>
 <button id="bot-btn" aria-label="Abrir asistente">💬 ¿Tienes dudas?</button>
 <div id="bot" role="dialog" aria-label="Asistente">
@@ -173,38 +173,45 @@ function ventana(html){
 }
 function verCuenta(id){
   fetch(API+"?accion=ver&id="+id).then(r=>r.json()).then(r=>{
-    if(!r.ok||r.estado!="atendido") return;
+    if(!r.ok||(r.estado!="atendido"&&r.estado!="cobrada")) return;
+    const cobrada=r.estado=="cobrada"; if(cobrada) guardarAcum({mesa:MESA,dia:hoyStr(),pedidos:[]});
     clearInterval(cuentaInt); try{localStorage.removeItem("cuenta_pend")}catch(e){}
-    $("cuenta").disabled=false; $("cuenta").textContent="🧾 Pedir la cuenta";
+    $("cuenta").disabled=false; $("cuenta").textContent="🙋 Solicitar al mesero";
     timbre();
-    ventana(`<div style="font-size:44px">🧾</div><h3 style="margin:6px 0">Respuesta del mesero</h3>
-      <p style="font-size:1.1em">${esc(r.respuesta||"Ya voy con tu cuenta.")}</p>
+    ventana(`<div style="font-size:44px">${cobrada?"💵":"🙋"}</div><h3 style="margin:6px 0">Respuesta del mesero</h3>
+      <p style="font-size:1.1em">${esc(r.respuesta||"Ya voy a tu mesa.")}</p>${cobrada?"<p><b>✅ Cuenta cerrada. ¡Gracias por visitarnos!</b></p>":""}
       ${r.total?`<p style="font-size:1.3em"><b>Total: $${Number(r.total).toFixed(2).replace(/\.00$/,"")}</b></p>`:""}
       ${r.mesero?`<small>Te atiende: ${esc(r.mesero)}</small>`:""}`);
   }).catch(()=>{});
 }
 function esperarCuenta(id){ $("cuenta").disabled=true; $("cuenta").textContent="⏳ Esperando respuesta del mesero…"; clearInterval(cuentaInt); cuentaInt=setInterval(()=>verCuenta(id),5000); }
-$("llamar").onclick=()=>{
-  const b=$("llamar"); b.disabled=true; b.textContent="Llamando…";
-  enviarSistema({tipo:"mesonero",mesa:MESA}).then(()=>aviso("🙋 Listo, el mesero viene a tu mesa")).catch(e=>aviso("⚠️ "+e.message))
-   .finally(()=>setTimeout(()=>{b.disabled=false;b.textContent="🙋 Llamar al mesero"},8000));
-};
+function hoyStr(){const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
+function leerAcum(){try{const a=JSON.parse(localStorage.getItem("acum_mesa")||"null");if(a&&a.mesa==MESA&&a.dia==hoyStr())return a;}catch(e){}return {mesa:MESA,dia:hoyStr(),pedidos:[]};}
+function guardarAcum(a){try{localStorage.setItem("acum_mesa",JSON.stringify(a))}catch(e){}pintarAcum();}
+function pintarAcum(){
+  const box=$("acum"); if(!box) return; const a=leerAcum();
+  if(!MESA||!a.pedidos.length){box.style.display="none";return;}
+  const tot=a.pedidos.reduce((x,p)=>x+Number(p.total||0),0);
+  box.style.cssText="display:block;background:#fff;border:2px dashed #c9a46a;border-radius:12px;padding:12px;margin-top:10px;line-height:1.5";
+  box.innerHTML=`<b>🧮 Lo que llevas consumido</b><br>`+a.pedidos.map((p,i)=>`<div style="margin-top:6px"><small>Pedido ${i+1} · ${esc(p.hora)}</small><br>${p.items.map(esc).join("<br>")}<br><b>$${Number(p.total).toFixed(2).replace(/\.00$/,"")}</b></div>`).join("")+
+   `<div style="border-top:1px solid #e8d9c4;margin-top:8px;padding-top:8px;font-size:1.15em"><b>Total acumulado: $${tot.toFixed(2).replace(/\.00$/,"")}</b></div><small>Así sabes cuánto llevas antes de pedir más.</small>`;
+}
 $("cuenta").onclick=()=>{
   timbre(); // desbloquea el sonido en el teléfono
   enviarSistema({tipo:"cuenta",mesa:MESA}).then(r=>{
-    aviso("🧾 Le avisamos al mesero. Te responderá aquí mismo.");
+    aviso("🙋 Le avisamos al mesero. Te responderá aquí mismo.");
     try{localStorage.setItem("cuenta_pend",JSON.stringify({id:r.id,mesa:MESA,t:Date.now()}))}catch(e){}
     esperarCuenta(r.id);
   }).catch(e=>aviso("⚠️ "+e.message));
 };
-setTimeout(()=>{try{const c=JSON.parse(localStorage.getItem("cuenta_pend")||"null"); if(c&&c.mesa==MESA&&Date.now()-c.t<3*3600e3) esperarCuenta(c.id);}catch(e){}},0);
+setTimeout(()=>{pintarAcum();try{const c=JSON.parse(localStorage.getItem("cuenta_pend")||"null"); if(c&&c.mesa==MESA&&Date.now()-c.t<3*3600e3) esperarCuenta(c.id);}catch(e){}},0);
 if(MESA){
   $("bot-btn").style.display="none"; $("bot").style.display="none";
   document.title="Mesa "+MESA+" · Dulcería Los Andes";
   $("tag").textContent="🍽️ Estás en la Mesa "+MESA; $("tag").classList.add("mesa-tag");
   document.querySelector(".hero p").textContent="Pide desde tu mesa: elige, envía y te lo llevamos.";
   $("wa-top").textContent="🙋 Llamar al mesonero";
-  $("pasos").innerHTML="<li>Toca “Agregar” en lo que quieras.</li><li>Abre tu pedido abajo y toca “Enviar pedido”.</li><li>Sigue tu pedido aquí mismo: te lo llevamos a la Mesa "+MESA+". Al final, pide la cuenta desde aquí: el mesero te responde en esta misma pantalla.</li>";
+  $("pasos").innerHTML="<li>Toca “Agregar” en lo que quieras.</li><li>Abre tu pedido abajo y toca “Enviar pedido”.</li><li>Sigue tu pedido aquí mismo: te lo llevamos a la Mesa "+MESA+". Para lo que necesites o para tu cuenta, toca «Solicitar al mesero»: te responde en esta misma pantalla.</li>";
   $("carro-tit").textContent="Pedido · Mesa "+MESA; $("cuenta").style.display="flex";
 } else { $("datos").style.display="block";
 }
@@ -218,7 +225,7 @@ function pintarCarro(){
   const tot=ks.reduce((a,k)=>a+carro[k]*n((productos.find(p=>p.nombre==k)||{}).precio),0);
   const bar=$("carro-bar"), sigue=$("seguimiento").style.display=="block"; bar.style.display=(cant||sigue)?"block":"none";
   $("bot-btn").classList.toggle("alto",!!cant); $("bot").classList.toggle("alto",!!cant);
-  bar.textContent=cant?"🛒 Ver pedido · "+cant+(cant==1?" producto":" productos")+" · $"+tot.toFixed(2).replace(/\.00$/,""):"📋 Ver mi pedido"+(MESA?" y pedir la cuenta":"");
+  bar.textContent=cant?"🛒 Ver pedido · "+cant+(cant==1?" producto":" productos")+" · $"+tot.toFixed(2).replace(/\.00$/,""):"📋 Ver mi pedido"+(MESA?" y solicitar al mesero":"");
   $("carro-items").innerHTML=ks.length?ks.map(k=>`<div class="it"><span>${esc(k)}</span><button data-k="${esc(k)}" data-d="-1">−</button><b>${carro[k]}</b><button data-k="${esc(k)}" data-d="1">+</button></div>`).join(""):"<p>Tu pedido está vacío.</p>";
   $("carro-items").querySelectorAll("button").forEach(b=>b.onclick=()=>{carro[b.dataset.k]=Math.max(0,(carro[b.dataset.k]||0)+ +b.dataset.d);pintarCarro()});
   $("carro-tot").textContent="Total: $"+tot.toFixed(2).replace(/\.00$/,"");
@@ -229,7 +236,6 @@ function pintarCarro(){
   $("carro-tot").style.display=(sigue&&vacio)?"none":"";
   $("enviar").style.display=(sigue&&vacio)?"none":"";
   if(!MESA) $("datos").style.display=(sigue&&vacio)?"none":"block";
-  $("llamar").style.display=(sigue&&MESA)?"flex":"none";
   if(sigue&&vacio) $("carro-items").innerHTML="";
 }
 let ultimo={ks:[],tot:0}, seguir=null;
@@ -238,7 +244,7 @@ const PASOS=[
  ["en cocina","👨‍🍳 Preparando en cocina","Tu pedido ya se está preparando. No necesitas hacer nada."],
  ["listo",(MESA?"✅ Listo, ya va a tu mesa":"✅ Listo para salir"),(MESA?"El mesero lo está llevando a la Mesa "+MESA+".":"Tu pedido está listo y espera a un repartidor.")],
  ...(MESA?[]:[["en camino","🛵 En camino a tu dirección","El repartidor ya salió hacia la ubicación que marcaste. Ten tu teléfono a mano."]]),
- ["entregado",(MESA?"🍽️ Servido. ¡Buen provecho!":"🚚 Entregado. ¡Gracias!"),(MESA?"¿Necesitas algo más? Toca «Llamar al mesero». Cuando termines, toca «Pedir la cuenta».":"¡Gracias por tu compra! Puedes hacer otro pedido cuando quieras.")]];
+ ["entregado",(MESA?"🍽️ Servido. ¡Buen provecho!":"🚚 Entregado. ¡Gracias!"),(MESA?"¿Necesitas algo más o tu cuenta? Toca «Solicitar al mesero». Abajo ves todo lo que llevas consumido.":"¡Gracias por tu compra! Puedes hacer otro pedido cuando quieras.")]];
 let SG=null;
 function hace(t){const m=Math.floor((Date.now()-t)/60000);return m<1?"hace menos de 1 min":"hace "+m+" min";}
 function pintarSeguimiento(estado){
@@ -277,6 +283,7 @@ $("enviar").onclick=()=>{
     carro={}; $("nota").value=""; $("seguimiento").style.display="block"; pintarCarro(); $("enviar").textContent="✅ Enviar pedido"; aviso("✅ Pedido enviado");
     SG={id:r.id,items:ks.map(k=>q.pedido.split("\n")[ks.indexOf(k)]),total:q.total.replace(/\.00$/,""),t:Date.now(),estado:"nuevo",mesa:MESA};
     try{localStorage.setItem("sg_pedido",JSON.stringify(SG))}catch(e){}
+    if(MESA){const a=leerAcum();a.pedidos.push({items:SG.items,total:Number(q.total),hora:new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})});guardarAcum(a);}
     pintarSeguimiento("nuevo"); clearInterval(seguir); verEstado(r.id); seguir=setInterval(()=>verEstado(r.id),6000);
     setTimeout(()=>$("seguimiento").scrollIntoView({behavior:"smooth",block:"center"}),300);
   }).catch(e=>{ $("enviar").disabled=false; $("enviar").textContent="✅ Enviar pedido"; aviso("⚠️ "+e.message); });

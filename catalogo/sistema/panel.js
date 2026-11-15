@@ -50,10 +50,11 @@ function tarjeta(o){
   const {dir, nota} = partir(o.Nota);
   const lugar = o.Mesa ? "Mesa "+esc(o.Mesa) : (ROL=="cocina" ? "🛵 Para delivery" : "Delivery · "+esc(o.Cliente));
   if(o.Tipo=="mesonero"){ titulo="🙋 "+lugar+" llama al mesero"; clase="alerta"; botones=`<button data-id="${o.ID}" data-n="atendido">✓ Ya voy</button>`; }
-  else if(o.Tipo=="cuenta"){ titulo="🧾 "+lugar+" pide la cuenta"; clase="alerta";
-    botones= ROL=="mesero" ? `<div class="cuenta-r" style="width:100%"><div><b>Cuenta: ${o.Pedido?"":"sin pedidos registrados"}</b></div>${o.Pedido?`<div class="items">${items}</div><div class="tot">Total: $${esc(o.Total)}</div>`:""}
-      <textarea id="msg-${o.ID}" rows="2" style="width:100%;margin:6px 0;padding:6px;border-radius:8px;border:1px solid #ccc" placeholder="Mensaje para la mesa (opcional)">Ya voy con tu cuenta.</textarea>
-      <button data-id="${o.ID}" data-n="atendido">📨 Responder a la mesa</button></div>` : ""; }
+  else if(o.Tipo=="cuenta"){ titulo="🙋 "+lugar+" solicita al mesero"; clase="alerta";
+    botones= ROL=="mesero" ? `<div style="width:100%"><div><b>Consumo acumulado de la mesa:</b></div>${o.Pedido?`<div class="items">${items}</div><div class="tot">Total: $${esc(o.Total)}</div>`:"<div>Sin pedidos registrados</div>"}
+      <textarea id="msg-${o.ID}" rows="2" style="width:100%;margin:6px 0;padding:6px;border-radius:8px;border:1px solid #ccc" placeholder="Mensaje para la mesa">Ya voy a tu mesa.</textarea>
+      <button data-id="${o.ID}" data-n="atendido">📨 Responder a la mesa</button>
+      <button data-id="${o.ID}" data-n="cobrada" style="background:#5a3a22">💵 Cuenta cobrada · cerrar mesa</button></div>` : ""; }
   else {
     titulo="🍽️ "+lugar;
     if(ROL=="caja" && o.Estado=="nuevo") botones=`<button data-id="${o.ID}" data-n="en cocina">✓ Confirmar y enviar a cocina</button><button class="no" data-id="${o.ID}" data-n="rechazado">✕ Rechazar</button>`;
