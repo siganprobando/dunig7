@@ -65,6 +65,23 @@ footer small{display:block;margin-top:6px;font-size:.75rem}
 .campo{width:100%;border:1.5px solid #e2d3c2;border-radius:12px;padding:10px;font:inherit;margin-bottom:8px}
 #seguimiento{background:var(--crema);border-radius:12px;padding:12px;margin-top:10px;line-height:1.8}
 #seguimiento .on{font-weight:800;color:var(--cafe)}
+#seguimiento{line-height:1.45;border:2px solid #e8d9c4}
+.sg-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.sg-num{background:var(--cafe);color:#fff;border-radius:20px;padding:2px 10px;font-size:.85em}
+.sg-bar{height:10px;background:#eadfcf;border-radius:10px;overflow:hidden;margin:8px 0 12px}
+.sg-bar i{display:block;height:100%;background:linear-gradient(90deg,#25d366,#1e9e4f);border-radius:10px;transition:width .6s}
+.sg-paso{display:flex;gap:10px;align-items:flex-start;padding:7px 8px;border-radius:10px;margin:3px 0;opacity:.45}
+.sg-paso .pt{width:22px;height:22px;border-radius:50%;border:2px solid #b9a58a;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;margin-top:2px}
+.sg-paso.hecho{opacity:1}.sg-paso.hecho .pt{background:#1e9e4f;border-color:#1e9e4f}
+.sg-paso.ahora{opacity:1;background:#fff3d6;box-shadow:0 0 0 2px #f0b93a inset;animation:sgLuz 1.4s ease-in-out infinite}
+.sg-paso.ahora .pt{background:#f0b93a;border-color:#f0b93a;animation:sgPunto 1s ease-in-out infinite}
+.sg-paso small{display:block;font-weight:400;color:#6b5a48;font-size:.85em}
+@keyframes sgLuz{0%,100%{box-shadow:0 0 0 2px #f0b93a inset}50%{box-shadow:0 0 0 2px #f0b93a inset,0 0 14px #f0b93a}}
+@keyframes sgPunto{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.25);opacity:.5}}
+.sg-info{background:#fff;border-radius:10px;padding:8px 10px;margin-top:10px;font-size:.92em}
+.sg-info b{color:var(--cafe)}
+.sg-vivo{font-size:.8em;color:#1e9e4f}.sg-vivo:before{content:"● ";animation:sgPunto 1s infinite}
+@media (prefers-reduced-motion:reduce){.sg-paso.ahora,.sg-paso.ahora .pt,.sg-vivo:before{animation:none}}
 #aviso{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:var(--cafe);color:#fff;padding:12px 18px;border-radius:24px;z-index:70;display:none;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.3)}
 .mesa-tag{background:var(--dorado)!important;font-weight:700}
 </style>
@@ -166,14 +183,33 @@ function pintarCarro(){
   $("enviar").disabled=!ks.length;
 }
 let ultimo={ks:[],tot:0}, seguir=null;
-const PASOS=[["nuevo","📥 Recibido en caja"],["en cocina","👨‍🍳 Preparando en cocina"],["listo",(MESA?"✅ Listo, ya va a tu mesa":"✅ Listo para salir")],...(MESA?[]:[["en camino","🛵 En camino a tu dirección"]]),["entregado",(MESA?"🍽️ Servido. ¡Buen provecho!":"🚚 Entregado. ¡Gracias!")]];
+const PASOS=[
+ ["nuevo","📥 Recibido en caja","La caja está revisando tu pedido. En un momento pasa a cocina."],
+ ["en cocina","👨‍🍳 Preparando en cocina","Tu pedido ya se está preparando. No necesitas hacer nada."],
+ ["listo",(MESA?"✅ Listo, ya va a tu mesa":"✅ Listo para salir"),(MESA?"El mesero lo está llevando a la Mesa "+MESA+".":"Tu pedido está listo y espera a un repartidor.")],
+ ...(MESA?[]:[["en camino","🛵 En camino a tu dirección","El repartidor ya salió hacia la ubicación que marcaste. Ten tu teléfono a mano."]]),
+ ["entregado",(MESA?"🍽️ Servido. ¡Buen provecho!":"🚚 Entregado. ¡Gracias!"),(MESA?"¿Quieres algo más? Agrégalo arriba. Cuando termines, toca «Pedir la cuenta».":"¡Gracias por tu compra! Puedes hacer otro pedido cuando quieras.")]];
+let SG=null;
+function hace(t){const m=Math.floor((Date.now()-t)/60000);return m<1?"hace menos de 1 min":"hace "+m+" min";}
+function pintarSeguimiento(estado){
+  if(!SG) return;
+  const box=$("seguimiento");
+  if(estado=="rechazado"){ box.innerHTML="<b>❌ Tu pedido no pudo ser aceptado.</b><div class='sg-info'>"+(MESA?"Llama al mesero para saber qué pasó.":"Comunícate con el negocio para saber qué pasó.")+"</div>"; return; }
+  const i=Math.max(0,PASOS.findIndex(p=>p[0]==estado)), fin=estado=="entregado";
+  const pct=Math.round((i+(fin?1:0.5))/PASOS.length*100);
+  box.innerHTML=`<div class="sg-top"><b>Tu pedido</b><span class="sg-num">N.º ${esc(String(SG.id))}</span></div>
+   <div>Paso ${i+1} de ${PASOS.length}${fin?"":" · <span class='sg-vivo'>se actualiza solo</span>"}</div>
+   <div class="sg-bar"><i style="width:${pct}%"></i></div>`+
+   PASOS.map((p,j)=>`<div class="sg-paso ${j<i||fin?"hecho":j==i?"ahora":""}"><span class="pt">${j<i||fin?"✓":""}</span><div><b>${p[1]}</b>${j==i?"<small>"+p[2]+"</small>":""}</div></div>`).join("")+
+   `<div class="sg-info"><b>Pediste:</b><br>${SG.items.map(esc).join("<br>")}<br><b>Total: $${SG.total}</b><br><small>Enviado ${hace(SG.t)}${SG.ult?" · revisado "+new Date(SG.ult).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}):""}</small></div>`+
+   (fin?"":`<div class="sg-info">💡 No cierres esta página: aquí verás cada cambio. ${MESA?"Si necesitas algo, llama al mesero.":"Si cambias de lugar, avísale al negocio."}</div>`);
+}
 function verEstado(id){
   fetch(API+"?accion=ver&id="+id).then(r=>r.json()).then(r=>{
     if(!r.ok) return;
-    if(r.estado=="rechazado"){ $("seguimiento").innerHTML="❌ Tu pedido no pudo ser aceptado. Llama al mesero."; clearInterval(seguir); return; }
-    const i=PASOS.findIndex(p=>p[0]==r.estado);
-    $("seguimiento").innerHTML="<b>Tu pedido</b><br>"+PASOS.map((p,j)=>`<span class="${j<=i?"on":""}">${j<=i?"●":"○"} ${p[1]}</span>`).join("<br>");
-    if(r.estado=="entregado") clearInterval(seguir);
+    if(SG){SG.ult=Date.now(); SG.estado=r.estado; try{localStorage.setItem("sg_pedido",JSON.stringify(SG))}catch(e){}}
+    pintarSeguimiento(r.estado);
+    if(r.estado=="rechazado"||r.estado=="entregado") clearInterval(seguir);
   }).catch(()=>{});
 }
 $("enviar").onclick=()=>{
@@ -189,9 +225,14 @@ $("enviar").onclick=()=>{
   $("enviar").disabled=true; $("enviar").textContent="Enviando…";
   enviarSistema(q).then(r=>{
     carro={}; $("nota").value=""; $("seguimiento").style.display="block"; pintarCarro(); $("enviar").textContent="✅ Enviar pedido"; aviso("✅ Pedido enviado");
-    clearInterval(seguir); verEstado(r.id); seguir=setInterval(()=>verEstado(r.id),6000);
+    SG={id:r.id,items:ks.map(k=>q.pedido.split("\n")[ks.indexOf(k)]),total:q.total.replace(/\.00$/,""),t:Date.now(),estado:"nuevo",mesa:MESA};
+    try{localStorage.setItem("sg_pedido",JSON.stringify(SG))}catch(e){}
+    pintarSeguimiento("nuevo"); clearInterval(seguir); verEstado(r.id); seguir=setInterval(()=>verEstado(r.id),6000);
+    setTimeout(()=>$("seguimiento").scrollIntoView({behavior:"smooth",block:"center"}),300);
   }).catch(e=>{ $("enviar").disabled=false; $("enviar").textContent="✅ Enviar pedido"; aviso("⚠️ "+e.message); });
 };
+setTimeout(function(){try{const g=JSON.parse(localStorage.getItem("sg_pedido")||"null");
+  if(g&&g.mesa==MESA&&Date.now()-g.t<6*3600e3&&g.estado!="entregado"&&g.estado!="rechazado"){SG=g;$("seguimiento").style.display="block";pintarSeguimiento(g.estado);pintarCarro();verEstado(g.id);seguir=setInterval(()=>verEstado(g.id),6000);}}catch(e){}},0);
 let GPS="";
 $("gps-btn").onclick=()=>{
   if(!navigator.geolocation){ aviso("Tu teléfono no permite ubicación"); return; }
