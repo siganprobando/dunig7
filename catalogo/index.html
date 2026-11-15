@@ -90,6 +90,59 @@ footer small{display:block;margin-top:6px;font-size:.75rem}
 #aviso{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:var(--cafe);color:#fff;padding:12px 18px;border-radius:24px;z-index:70;display:none;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.3)}
 .mesa-tag{background:var(--dorado)!important;font-weight:700}
 </style>
+<link rel="preconnect" href="https://fonts.gstatic.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>/* ===== Estilo moderno, fondo blanco ===== */
+:root{--oro:linear-gradient(110deg,#f5a300 0%,#ffd23f 25%,#fff3b0 50%,#ffd23f 75%,#f5a300 100%);--tinta:#1a1200;--gris:#6b6b76;--linea:#eeeef2;--suave:#f7f7fa}
+body{font-family:Poppins,system-ui,Roboto,sans-serif;background:#fff;color:#16161d}
+.hero{min-height:58vh;border-radius:0 0 32px 32px;overflow:hidden}
+.hero:before{background:linear-gradient(to top,rgba(10,8,4,.82),rgba(10,8,4,.05))}
+.hero h1,h2,#carro h3{font-family:Poppins,system-ui,sans-serif;font-weight:800;letter-spacing:-.5px}
+.hero h1{font-size:clamp(2.1rem,8vw,3.6rem)}
+.tag{background:rgba(255,255,255,.16);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.3);font-weight:500;padding:6px 14px}
+.tag:before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:#2ee66b;margin-right:7px;vertical-align:middle;animation:sgPunto 1.4s infinite}
+.btn{background:var(--oro);background-size:200% auto;color:var(--tinta);border-radius:999px;font-weight:700;box-shadow:0 8px 26px rgba(255,190,0,.35);animation:brillo 5s linear infinite;transition:transform .2s,box-shadow .2s}
+.btn:active{transform:scale(.97)}
+.btn.sec{background:#fff;color:var(--tinta);border:1.5px solid var(--linea);box-shadow:none;animation:none}
+h2{color:var(--tinta);font-size:1.8rem}
+h2:after{content:"";display:block;width:46px;height:5px;border-radius:5px;background:var(--oro);margin-top:8px}
+.chip{border:1.5px solid var(--linea);background:var(--suave);color:var(--tinta);border-radius:999px;font-weight:600;padding:8px 16px;transition:.2s}
+.chip.on{background:var(--oro);background-size:200% auto;border-color:transparent;color:var(--tinta);box-shadow:0 6px 18px rgba(255,190,0,.35)}
+.grid{gap:18px}
+.card{border-radius:22px;border:1px solid var(--linea);box-shadow:0 10px 30px rgba(20,20,40,.06);transition:transform .25s,box-shadow .25s;animation:subir .5s ease both}
+.card:active{transform:scale(.98)}
+.card img{transition:transform .5s}.card:hover img{transform:scale(1.05)}
+.card h3{font-weight:700}.card p{color:var(--gris)}
+.price{color:var(--tinta);font-weight:800;font-size:1.35rem}
+.price:before{content:"";display:inline-block;width:6px;height:18px;border-radius:3px;background:var(--oro);margin-right:7px;vertical-align:-2px}
+.agotado .btn{background:#d9d9e0;color:#777;box-shadow:none;animation:none}
+.steps li{background:var(--suave);border:1px solid var(--linea);border-radius:18px}
+.steps li:before{background:var(--oro);color:var(--tinta)}
+.info{background:var(--suave);border:1px solid var(--linea);border-radius:18px}
+footer{color:var(--gris)}
+#bot-btn{background:#16161d;border-radius:999px}
+#bot{border-radius:22px;border:1px solid var(--linea)}
+#bot .top{background:#16161d}
+#bot .msgs{background:var(--suave)}
+.m.u{background:#ffd23f;color:var(--tinta)}
+#bot .ops button{border-color:var(--linea);color:var(--tinta);background:#fff;border-radius:999px}
+#carro{background:rgba(10,10,20,.55);backdrop-filter:blur(4px)}
+#carro .hoja{border-radius:28px 28px 0 0;animation:hojaSube .3s ease}
+#carro h3{color:var(--tinta)}
+.it{border-bottom:1px solid var(--linea)}
+.it button{border:0;background:var(--suave);color:var(--tinta);box-shadow:inset 0 0 0 1.5px var(--linea)}
+.it button[data-d="1"]{background:var(--oro);background-size:200% auto;box-shadow:none}
+#carro textarea,.campo{border:1.5px solid var(--linea);border-radius:14px;background:var(--suave)}
+.tot{color:var(--tinta)}
+#seguimiento{background:#fff;border:1.5px solid var(--linea);border-radius:18px}
+.sg-num{background:#16161d}.sg-info{background:var(--suave)}
+#aviso{background:#16161d;border-radius:999px}
+.mesa-tag{background:rgba(255,210,63,.9)!important;color:var(--tinta);border-color:transparent}
+.kio-caja{border-radius:28px!important;border:0!important;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.kio-n{background:var(--oro);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:brillo 4s linear infinite}
+@keyframes subir{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes hojaSube{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.btn,.card,.chip.on,#carro-bar{animation:none}}
+</style>
 </head>
 <body>
 <header class="hero"><div class="hero-in">
