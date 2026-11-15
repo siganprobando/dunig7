@@ -124,7 +124,7 @@ function porMesa(ps){                       // caja: un cuadro por mesa; al toca
       <span class="mc-nom">${esc(k)}</span>
       <span class="mc-est">${nuevos?`🔴 ${nuevos} ${ROL=="cocina"?"por preparar":"nuevo"+(nuevos>1?"s":"")}`:"✓ Al día"}</span>
       ${cons[k]?`<span class="mc-det">🧾 Consumo abierto: ${fmt(Number(cons[k].total))}</span>`:""}
-      <span class="mc-det">${l.length} ${ROL=="mesero"?(l.length>1?"avisos":"aviso"):(l.length>1?"pedidos":"pedido")}${ROL=="caja"?" · "+fmt(tot):""}</span></button>${cons[k]?`<button class="mesa-cerrar" data-cerrar="${esc(cons[k].mesa)}" data-total="${fmt(Number(cons[k].total))}">💵 Cerrar mesa · ${fmt(Number(cons[k].total))}</button>`:""}</div>`;
+      <span class="mc-det">${l.length} ${ROL=="mesero"?(l.length>1?"avisos":"aviso"):(l.length>1?"pedidos":"pedido")}${ROL=="caja"?" · "+fmt(tot):""}</span></button>${cons[k]?(cons[k].pendientes>0?`<button class="mesa-cerrar mesa-bloq" disabled>🔒 ${cons[k].pendientes} ${cons[k].pendientes>1?"pedidos pendientes":"pedido pendiente"} · no se puede cerrar</button>`:`<button class="mesa-cerrar" data-cerrar="${esc(cons[k].mesa)}" data-total="${fmt(Number(cons[k].total))}">💵 Cerrar mesa · ${fmt(Number(cons[k].total))}</button>`):""}</div>`;
   }).join("");
   const det = ABIERTA ? `<section class="mesa-detalle"><div class="md-top"><b>${esc(ABIERTA)}</b><button class="md-cerrar" data-mesa="${esc(ABIERTA)}">✕ Cerrar</button></div>
       ${cons[ABIERTA]?`<div class="card"><b>🧾 Consumo de la ${esc(ABIERTA)} (${cons[ABIERTA].n} ${cons[ABIERTA].n>1?"pedidos":"pedido"})</b>
@@ -148,6 +148,7 @@ function activarCierre(){
 // Ventana de alerta antes de cerrar: la cajera revisa el consumo y confirma que el cliente pagó todo.
 function confirmarCierre(b){
   const m=MESAS.find(x=>x.mesa==b.dataset.cerrar); if(!m) return;
+  if(m.pendientes>0){ alert("No se puede cerrar la Mesa "+m.mesa+": todavía tiene pedidos pendientes. Primero deben entregarse."); return; }
   const v=document.createElement("div"); v.className="alerta-cierre";
   v.innerHTML=`<div class="ac-caja"><div style="font-size:46px">⚠️</div><h3>¿De verdad quieres cerrar la Mesa ${esc(m.mesa)}?</h3>
     <p>Antes de cerrar, <b>verifica bien que el cliente pagó todo correctamente</b>. Al cerrarla, su consumo se archiva y la mesa queda libre para un nuevo cliente. <b>No se puede deshacer.</b></p>
@@ -170,6 +171,7 @@ function confirmarCierre(b){
 .mesa-cuadro .mc-nom{font-size:1.3em;font-weight:800}.mesa-cuadro .mc-est{font-weight:700}.mesa-cuadro .mc-det{opacity:.85;font-size:.9em}
 .mesa-celda{display:flex;flex-direction:column;gap:6px}.mesa-celda .mesa-cuadro{flex:1}
 .mesa-cerrar{background:#1e7a3c;color:#fff;border:0;border-radius:12px;padding:10px;font:inherit;font-weight:700}
+.mesa-bloq{background:#7a6a5a;font-size:.85em}
 .mesa-alerta{background:#c0392b;border-color:#ff6b5b;animation:mesaLuz 1s ease-in-out infinite}
 .mesa-abierta{outline:4px solid #f0b93a;outline-offset:2px}
 @keyframes mesaLuz{0%,100%{background:#c0392b;box-shadow:0 0 0 0 rgba(231,76,60,.7)}50%{background:#e74c3c;box-shadow:0 0 18px 4px rgba(231,76,60,.8)}}
