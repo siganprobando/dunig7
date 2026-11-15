@@ -120,16 +120,16 @@ function porMesa(ps){                       // caja: un cuadro por mesa; al toca
   const cuadros=orden.map(k=>{
     const l=g[k], tot=l.reduce((s,o)=>s+(o.Tipo=="pedido"?parseFloat(String(o.Total).replace(",","."))||0:0),0);
     const nuevos=l.filter(importante).length, abierta=k==ABIERTA;
-    return `<button class="mesa-cuadro ${nuevos?"mesa-alerta":""} ${abierta?"mesa-abierta":""}" data-mesa="${esc(k)}">
+    return `<div class="mesa-celda"><button class="mesa-cuadro ${nuevos?"mesa-alerta":""} ${abierta?"mesa-abierta":""}" data-mesa="${esc(k)}">
       <span class="mc-nom">${esc(k)}</span>
       <span class="mc-est">${nuevos?`🔴 ${nuevos} ${ROL=="cocina"?"por preparar":"nuevo"+(nuevos>1?"s":"")}`:"✓ Al día"}</span>
       ${cons[k]?`<span class="mc-det">🧾 Consumo abierto: ${fmt(Number(cons[k].total))}</span>`:""}
-      <span class="mc-det">${l.length} ${ROL=="mesero"?(l.length>1?"avisos":"aviso"):(l.length>1?"pedidos":"pedido")}${ROL=="caja"?" · "+fmt(tot):""}</span></button>`;
+      <span class="mc-det">${l.length} ${ROL=="mesero"?(l.length>1?"avisos":"aviso"):(l.length>1?"pedidos":"pedido")}${ROL=="caja"?" · "+fmt(tot):""}</span></button>${cons[k]?`<button class="mesa-cerrar" data-cerrar="${esc(cons[k].mesa)}" data-total="${fmt(Number(cons[k].total))}">💵 Cerrar mesa · ${fmt(Number(cons[k].total))}</button>`:""}</div>`;
   }).join("");
   const det = ABIERTA ? `<section class="mesa-detalle"><div class="md-top"><b>${esc(ABIERTA)}</b><button class="md-cerrar" data-mesa="${esc(ABIERTA)}">✕ Cerrar</button></div>
       ${cons[ABIERTA]?`<div class="card"><b>🧾 Consumo de la ${esc(ABIERTA)} (${cons[ABIERTA].n} ${cons[ABIERTA].n>1?"pedidos":"pedido"})</b>
         <div class="items">${esc(cons[ABIERTA].pedido).replace(/\n/g,"<br>")}</div><div class="tot">Total a cobrar: ${fmt(Number(cons[ABIERTA].total))}</div>
-        <div class="bts"><button data-cerrar="${esc(cons[ABIERTA].mesa)}" data-total="${fmt(Number(cons[ABIERTA].total))}" style="background:#1e7a3c">💵 Cliente pagó · cerrar mesa</button></div></div>`:""}
+        <div class="sub">Para cobrar, usa el botón «💵 Cerrar mesa» debajo del cuadro de la mesa.</div></div>`:""}
       <div style="display:grid;gap:10px">${g[ABIERTA].map(tarjeta).join("")}</div></section>` : `<p class="vacio" style="grid-column:1/-1;margin:4px 0">Toca una mesa para ver sus pedidos.</p>`;
   return `<div class="mesas-grid">${cuadros}</div>${det}`;
 }
@@ -168,6 +168,8 @@ function confirmarCierre(b){
 .mesas-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px}
 .mesa-cuadro{display:flex;flex-direction:column;gap:4px;align-items:flex-start;text-align:left;background:#3a2a1e;color:#fff;border:3px solid #5a4330;border-radius:16px;padding:14px;font:inherit;cursor:pointer;min-height:100px}
 .mesa-cuadro .mc-nom{font-size:1.3em;font-weight:800}.mesa-cuadro .mc-est{font-weight:700}.mesa-cuadro .mc-det{opacity:.85;font-size:.9em}
+.mesa-celda{display:flex;flex-direction:column;gap:6px}.mesa-celda .mesa-cuadro{flex:1}
+.mesa-cerrar{background:#1e7a3c;color:#fff;border:0;border-radius:12px;padding:10px;font:inherit;font-weight:700}
 .mesa-alerta{background:#c0392b;border-color:#ff6b5b;animation:mesaLuz 1s ease-in-out infinite}
 .mesa-abierta{outline:4px solid #f0b93a;outline-offset:2px}
 @keyframes mesaLuz{0%,100%{background:#c0392b;box-shadow:0 0 0 0 rgba(231,76,60,.7)}50%{background:#e74c3c;box-shadow:0 0 18px 4px rgba(231,76,60,.8)}}
