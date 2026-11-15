@@ -1,0 +1,1 @@
+{"name": "Cocina · Dulcería Los Andes", "short_name": "Cocina", "start_url": "cocina.html", "scope": "./", "display": "fullscreen", "orientation": "any", "background_color": "#1d140e", "theme_color": "#5a3825", "icons": [{"src": "../quesillo.jpg", "sizes": "512x512", "type": "image/jpeg"}]}

@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>if(new URLSearchParams(location.search).get("kiosco")=="1")document.write('<link rel="manifest" href="kiosco.webmanifest">');</script>
 <title>Dulcería Los Andes · Catálogo</title>
 <style>
 :root{--cafe:#5a3825;--crema:#fff8ef;--dorado:#d99a3d;--verde:#25d366}
@@ -338,6 +339,20 @@ if(KIOSCO){                                   // si nadie toca la pantalla en 2 
 .kio-items{background:#faf5ef;border-radius:12px;padding:10px;margin:10px 0;line-height:1.5}.kio-tot{font-size:1.3rem;font-weight:800;margin-bottom:8px}
 .kio-pasos{text-align:left;margin:8px 0 14px 20px;line-height:1.5}.kio-caja .btn{width:100%;justify-content:center}.kio-seg{margin-top:8px;font-size:.85rem;color:#888}`;
   document.head.appendChild(st);
+  // ===== Pantalla bloqueada: pantalla completa (sin barra del enlace), sin menú de mantener pulsado, sin botón Atrás =====
+  const st2=document.createElement("style"); st2.textContent=`body{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+#kio-ini{position:fixed;inset:0;background:var(--cafe);color:#fff;z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;font-size:1.6rem;font-weight:800}
+#kio-ini small{font-size:1rem;font-weight:400;margin-top:12px;opacity:.85}`; document.head.appendChild(st2);
+  const enCompleta=()=>document.fullscreenElement||document.webkitFullscreenElement||matchMedia("(display-mode: fullscreen)").matches||matchMedia("(display-mode: standalone)").matches;
+  const completa=()=>{ if(enCompleta()) return; const d=document.documentElement; try{(d.requestFullscreen||d.webkitRequestFullscreen).call(d,{navigationUI:"hide"}).catch(()=>{});}catch(e){} };
+  const ini=document.createElement("div"); ini.id="kio-ini"; ini.innerHTML="👆 Toca la pantalla para pedir<small>Autoservicio · Dulcería Los Andes</small>";
+  const mostrarIni=()=>{ if(!enCompleta()&&!document.getElementById("kio-ini")) document.body.appendChild(ini); };
+  ini.onclick=()=>{ completa(); ini.remove(); };
+  document.addEventListener("click",completa,true);
+  document.addEventListener("fullscreenchange",()=>setTimeout(mostrarIni,300));
+  document.addEventListener("contextmenu",e=>e.preventDefault());
+  history.pushState(null,"",location.href); addEventListener("popstate",()=>history.pushState(null,"",location.href));
+  setTimeout(mostrarIni,0);
 }
 let GPS="";
 $("gps-btn").onclick=()=>{
