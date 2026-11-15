@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🙋 Mesero</title><style>*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,Roboto,sans-serif;background:#1d140e;color:#fff;min-height:100vh}
+header{background:#5a3825;padding:12px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:5}
+header h1{font-size:1.3rem;flex:1}
+header button{background:rgba(255,255,255,.15);color:#fff;border:0;border-radius:16px;padding:7px 12px;font-weight:600;cursor:pointer}
+#estado{font-size:.8rem;opacity:.85;width:100%}
+#ventas{width:100%;font-weight:800;color:#ffd38a}
+#lista{padding:12px;display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.card{background:#fff8ef;color:#2b1d14;border-radius:14px;padding:14px;border-left:8px solid #d99a3d}
+.card.alerta{border-left-color:#e74c3c;animation:pulso 1.2s ease-in-out 3}
+@keyframes pulso{50%{box-shadow:0 0 0 6px rgba(231,76,60,.5)}}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:baseline;margin-bottom:8px}
+.top b{font-size:1.15rem}.top span{font-size:.8rem;color:#6b5a4d;white-space:nowrap}
+.items{font-size:1.1rem;line-height:1.5;font-weight:600}
+.nota{background:#fff1c9;border-radius:8px;padding:6px 8px;margin-top:8px}
+.sub{margin-top:6px;color:#6b5a4d}.tot{margin-top:8px;font-size:1.2rem;font-weight:800;color:#5a3825}
+.est{margin-top:8px;font-size:.8rem;color:#6b5a4d;text-transform:capitalize}
+.bts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.bts button{flex:1;min-width:120px;background:#27ae60;color:#fff;border:0;border-radius:12px;padding:12px;font-size:1rem;font-weight:800;cursor:pointer}
+.bts button.no{background:#c0392b;flex:0 0 auto}
+.vacio{opacity:.7;padding:30px 10px;text-align:center;grid-column:1/-1}
+.capa{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:20;padding:20px}
+.caja{background:#fff8ef;color:#2b1d14;border-radius:18px;padding:22px;width:100%;max-width:340px;text-align:center}
+.caja h2{font-family:Georgia,serif;color:#5a3825;margin-bottom:12px}
+.caja input{width:100%;font-size:1.2rem;padding:12px;border:1.5px solid #d9c6b0;border-radius:12px;margin-bottom:10px;text-align:center}
+.caja button{width:100%;background:#5a3825;color:#fff;border:0;border-radius:12px;padding:13px;font-size:1.05rem;font-weight:800;cursor:pointer}
+#login-msg{color:#c0392b;min-height:1.2em;margin-bottom:6px}
+</style></head><body>
+<header><h1>🙋 <span id="rol"></span></h1><button id="salir">Salir</button>
+<div id="ventas"></div><div id="estado">Conectando…</div></header>
+<div id="lista"></div>
+<div class="capa"><div class="caja"><h2>🙋 Mesero</h2><p style="margin-bottom:14px">Toca para empezar y activar el sonido de los avisos.</p><button id="activar">Empezar</button></div></div>
+<div class="capa" id="login" style="display:none"><div class="caja"><h2>🙋 Mesero</h2><div id="login-msg"></div>
+<input id="mesero-nombre" placeholder="Tu nombre" style="display:none"><input id="pin" type="password" inputmode="numeric" placeholder="PIN"><button id="entrar">Entrar</button></div></div>
+<script>window.ROL="mesero";</script><script src="panel.js"></script>
+</body></html>

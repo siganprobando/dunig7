@@ -62,6 +62,10 @@ footer small{display:block;margin-top:6px;font-size:.75rem}
 .tot{font-size:1.3rem;font-weight:800;color:var(--cafe);margin:6px 0 12px}
 #carro .btn{width:100%;justify-content:center;margin-top:8px}
 .btn.sec{background:#fff;color:var(--cafe);border:1.5px solid var(--cafe)}
+.campo{width:100%;border:1.5px solid #e2d3c2;border-radius:12px;padding:10px;font:inherit;margin-bottom:8px}
+#seguimiento{background:var(--crema);border-radius:12px;padding:12px;margin-top:10px;line-height:1.8}
+#seguimiento .on{font-weight:800;color:var(--cafe)}
+#aviso{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:var(--cafe);color:#fff;padding:12px 18px;border-radius:24px;z-index:70;display:none;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.3)}
 .mesa-tag{background:var(--dorado)!important;font-weight:700}
 </style>
 </head>
@@ -70,7 +74,7 @@ footer small{display:block;margin-top:6px;font-size:.75rem}
   <span class="tag" id="tag">🚚 Delivery en Mérida y Ejido</span>
   <h1>Dulcería Los Andes</h1>
   <p>Postres caseros hechos en Mérida. Pide hoy, recibe mañana.</p>
-  <a class="btn" id="wa-top" target="_blank" rel="noopener">💬 Pide por WhatsApp</a>
+  <button class="btn" id="wa-top">🛒 Ver el menú</button>
 </div></header>
 
 <main>
@@ -82,8 +86,8 @@ footer small{display:block;margin-top:6px;font-size:.75rem}
   <h2 style="margin-top:34px">Cómo pedir</h2>
   <ol class="steps" id="pasos">
     <li>Toca “Agregar” en lo que quieras.</li>
-    <li>Abre tu pedido abajo y toca “Enviar pedido”.</li>
-    <li>Confirma tu pago (Pago Móvil o Zelle) y tu dirección.</li>
+    <li>Abre tu pedido abajo, escribe tus datos y toca “Enviar pedido”.</li>
+    <li>Paga con Pago Móvil o Zelle y sigue tu pedido aquí mismo.</li>
   </ol>
 
   <h2>Horario y contacto</h2>
@@ -92,47 +96,57 @@ footer small{display:block;margin-top:6px;font-size:.75rem}
 
 <footer>
   Página de ejemplo — Diseño web por David · Sigan Probando
-  <small>El negocio, el número de WhatsApp, el Instagram y los precios son ficticios. Los productos se cargan desde una hoja de Google.</small>
+  <small>El negocio, el Instagram y los precios son ficticios. Los productos se cargan desde una hoja de Google.</small>
 </footer>
 
+<div id="aviso"></div>
 <button id="carro-bar"></button>
 <div id="carro"><div class="hoja">
   <h3><span id="carro-tit">Tu pedido</span><button id="carro-x" aria-label="Cerrar">×</button></h3>
   <div id="carro-items"></div>
   <textarea id="nota" placeholder="Nota (ej: sin azúcar, para llevar…)"></textarea>
   <div class="tot" id="carro-tot"></div>
-  <a class="btn" id="enviar" target="_blank" rel="noopener">💬 Enviar pedido por WhatsApp</a>
-  <a class="btn" id="enviar-cocina" target="_blank" rel="noopener" style="display:none;background:#e67e22">👨‍🍳 Paso 2: enviar a la cocina</a>
-  <a class="btn sec" id="cuenta" target="_blank" rel="noopener" style="display:none">🧾 Pedir la cuenta</a>
+  <div id="datos" style="display:none"><input id="cli-nombre" placeholder="Tu nombre" class="campo"><input id="cli-tel" placeholder="Tu teléfono" inputmode="tel" class="campo"><input id="cli-dir" placeholder="Dirección de entrega" class="campo"></div>
+  <button class="btn" id="enviar">✅ Enviar pedido</button>
+  <div id="seguimiento" style="display:none"></div>
+  <button class="btn sec" id="cuenta" style="display:none">🧾 Pedir la cuenta</button>
 </div></div>
 <button id="bot-btn" aria-label="Abrir asistente">💬 ¿Tienes dudas?</button>
 <div id="bot" role="dialog" aria-label="Asistente">
   <div class="top"><span>Asistente · Respuestas rápidas</span><button id="bot-x" aria-label="Cerrar">×</button></div>
   <div class="msgs" id="bot-msgs"></div>
   <div class="ops"><div id="bot-ops" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-  <a class="btn" id="bot-wa" target="_blank" rel="noopener">💬 Escribir por WhatsApp</a></div>
+  </div>
 </div>
 
 <script>
 // ===== CONFIGURACIÓN: solo cambia estas dos líneas para otro negocio =====
 const SHEET_ID = "1SkaZA4m6t6Ti7DRR4B7VbWyf49taEUTc_TKh-xkxX4Y";
-let WHATSAPP = "580000000000"; // respaldo; el número real se lee de la pestaña Config de la hoja
-let COCINA = ""; // "WhatsApp cocina" en la pestaña Config (opcional)
+let API = ""; // "URL del sistema" en la pestaña Config de la hoja
 // =========================================================================
-const wa = t => "https://wa.me/" + WHATSAPP + "?text=" + encodeURIComponent(t);
 const MESA = (new URLSearchParams(location.search).get("mesa")||"").replace(/[^\w -]/g,"").slice(0,12);
 const $ = id => document.getElementById(id);
-function topLinks(){
-  $("wa-top").href = MESA ? wa("🙋 Mesa "+MESA+": necesitamos atención, por favor") : wa("Hola, quiero hacer un pedido");
-  $("cuenta").href = wa("🧾 Mesa "+MESA+": la cuenta, por favor");
+function aviso(t){const a=$("aviso");a.textContent=t;a.style.display="block";clearTimeout(a._t);a._t=setTimeout(()=>a.style.display="none",3500)}
+function enviarSistema(q){
+  if(!API) return Promise.reject(new Error("El sistema de pedidos aún no está activo."));
+  return fetch(API+"?"+new URLSearchParams(Object.assign({accion:"pedir"},q))).then(r=>r.json()).then(r=>{if(!r.ok)throw new Error(r.error);return r});
 }
+function topLinks(){}
+$("wa-top").onclick=()=>{
+  if(!MESA){document.querySelector("main").scrollIntoView({behavior:"smooth"});return}
+  enviarSistema({tipo:"mesonero",mesa:MESA}).then(()=>aviso("🙋 Listo, el mesero viene a tu mesa")).catch(e=>aviso("⚠️ "+e.message));
+};
+$("cuenta").onclick=()=>{
+  enviarSistema({tipo:"cuenta",mesa:MESA}).then(()=>aviso("🧾 Pedimos tu cuenta, ya te la llevan")).catch(e=>aviso("⚠️ "+e.message));
+};
 if(MESA){
   document.title="Mesa "+MESA+" · Dulcería Los Andes";
   $("tag").textContent="🍽️ Estás en la Mesa "+MESA; $("tag").classList.add("mesa-tag");
   document.querySelector(".hero p").textContent="Pide desde tu mesa: elige, envía y te lo llevamos.";
   $("wa-top").textContent="🙋 Llamar al mesonero";
-  $("pasos").innerHTML="<li>Toca “Agregar” en lo que quieras.</li><li>Abre tu pedido abajo y toca “Enviar pedido”.</li><li>Te lo llevamos a la Mesa "+MESA+". Al final, pide la cuenta desde aquí.</li>";
+  $("pasos").innerHTML="<li>Toca “Agregar” en lo que quieras.</li><li>Abre tu pedido abajo y toca “Enviar pedido”.</li><li>Sigue tu pedido aquí mismo: te lo llevamos a la Mesa "+MESA+". Al final, pide la cuenta desde aquí.</li>";
   $("carro-tit").textContent="Pedido · Mesa "+MESA; $("cuenta").style.display="flex";
+} else { $("datos").style.display="block";
 }
 topLinks();
 // ===== CARRITO =====
@@ -142,24 +156,44 @@ function pintarCarro(){
   const ks=Object.keys(carro).filter(k=>carro[k]>0);
   const cant=ks.reduce((a,k)=>a+carro[k],0);
   const tot=ks.reduce((a,k)=>a+carro[k]*n((productos.find(p=>p.nombre==k)||{}).precio),0);
-  const bar=$("carro-bar"); bar.style.display=cant?"block":"none";
+  const bar=$("carro-bar"), sigue=$("seguimiento").style.display=="block"; bar.style.display=(cant||sigue)?"block":"none";
   $("bot-btn").classList.toggle("alto",!!cant); $("bot").classList.toggle("alto",!!cant);
-  bar.textContent="🛒 Ver pedido · "+cant+(cant==1?" producto":" productos")+" · $"+tot.toFixed(2).replace(/\.00$/,"");
+  bar.textContent=cant?"🛒 Ver pedido · "+cant+(cant==1?" producto":" productos")+" · $"+tot.toFixed(2).replace(/\.00$/,""):"📋 Ver mi pedido"+(MESA?" y pedir la cuenta":"");
   $("carro-items").innerHTML=ks.length?ks.map(k=>`<div class="it"><span>${esc(k)}</span><button data-k="${esc(k)}" data-d="-1">−</button><b>${carro[k]}</b><button data-k="${esc(k)}" data-d="1">+</button></div>`).join(""):"<p>Tu pedido está vacío.</p>";
   $("carro-items").querySelectorAll("button").forEach(b=>b.onclick=()=>{carro[b.dataset.k]=Math.max(0,(carro[b.dataset.k]||0)+ +b.dataset.d);pintarCarro()});
   $("carro-tot").textContent="Total: $"+tot.toFixed(2).replace(/\.00$/,"");
-  const lineas=ks.map(k=>"• "+carro[k]+" x "+k).join("\n");
-  const nota=$("nota").value.trim();
-  $("enviar").href=wa((MESA?"🍽️ PEDIDO MESA "+MESA:"🛍️ NUEVO PEDIDO")+"\n"+lineas+"\nTotal: $"+tot.toFixed(2).replace(/\.00$/,"")+(nota?"\nNota: "+nota:""));
-  const msg=(MESA?"🍽️ PEDIDO MESA "+MESA:"🛍️ NUEVO PEDIDO")+"\n"+lineas+"\nTotal: $"+tot.toFixed(2).replace(/\.00$/,"")+(nota?"\nNota: "+nota:"");
-  $("enviar-cocina").href="https://wa.me/"+COCINA+"?text="+encodeURIComponent("👨‍🍳 COCINA · "+(MESA?"MESA "+MESA:"PEDIDO DELIVERY")+"\n"+lineas+(nota?"\nNota: "+nota:""));
-  $("enviar").textContent=COCINA?"💬 Paso 1: enviar pedido":(MESA?"💬 Enviar pedido a la cocina":"💬 Enviar pedido por WhatsApp");
+  ultimo={ks,tot};
+  $("enviar").disabled=!ks.length;
 }
+let ultimo={ks:[],tot:0}, seguir=null;
+const PASOS=[["nuevo","📥 Recibido en caja"],["en cocina","👨‍🍳 Preparando en cocina"],["listo",(MESA?"✅ Listo, ya va a tu mesa":"✅ Listo para salir")],["entregado",(MESA?"🍽️ Servido. ¡Buen provecho!":"🚚 Entregado. ¡Gracias!")]];
+function verEstado(id){
+  fetch(API+"?accion=ver&id="+id).then(r=>r.json()).then(r=>{
+    if(!r.ok) return;
+    if(r.estado=="rechazado"){ $("seguimiento").innerHTML="❌ Tu pedido no pudo ser aceptado. Llama al mesero."; clearInterval(seguir); return; }
+    const i=PASOS.findIndex(p=>p[0]==r.estado);
+    $("seguimiento").innerHTML="<b>Tu pedido</b><br>"+PASOS.map((p,j)=>`<span class="${j<=i?"on":""}">${j<=i?"●":"○"} ${p[1]}</span>`).join("<br>");
+    if(r.estado=="entregado") clearInterval(seguir);
+  }).catch(()=>{});
+}
+$("enviar").onclick=()=>{
+  const {ks,tot}=ultimo; if(!ks.length) return;
+  const nota=$("nota").value.trim(), q={tipo:"pedido",mesa:MESA,pedido:ks.map(k=>carro[k]+" x "+k).join("\n"),total:tot.toFixed(2),nota};
+  if(!MESA){
+    q.cliente=$("cli-nombre").value.trim(); q.tel=$("cli-tel").value.trim(); const dir=$("cli-dir").value.trim();
+    if(!q.cliente||!q.tel||!dir){ aviso("Escribe tu nombre, teléfono y dirección"); return; }
+    q.nota=("Dirección: "+dir+(nota?" · "+nota:"")).slice(0,200);
+  }
+  $("enviar").disabled=true; $("enviar").textContent="Enviando…";
+  enviarSistema(q).then(r=>{
+    carro={}; $("nota").value=""; $("seguimiento").style.display="block"; pintarCarro(); $("enviar").textContent="✅ Enviar pedido"; aviso("✅ Pedido enviado");
+    clearInterval(seguir); verEstado(r.id); seguir=setInterval(()=>verEstado(r.id),6000);
+  }).catch(e=>{ $("enviar").disabled=false; $("enviar").textContent="✅ Enviar pedido"; aviso("⚠️ "+e.message); });
+};
 $("carro-bar").onclick=()=>{pintarCarro();$("carro").classList.add("open")};
 $("carro-x").onclick=()=>$("carro").classList.remove("open");
 $("carro").onclick=e=>{if(e.target.id=="carro")$("carro").classList.remove("open")};
 $("nota").oninput=pintarCarro;
-$("enviar").addEventListener("click",()=>{if(COCINA)setTimeout(()=>{$("enviar-cocina").style.display="flex"},400)});
 
 function parseCSV(txt){
   const rows=[];let row=[],cell="",q=false;
@@ -192,14 +226,7 @@ function pintar(){
 const gv = hoja => fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=${hoja}&t=${Date.now()}`).then(r=>r.text());
 gv("Config").then(t=>{
   for(const r of parseCSV(t.trim()).slice(1)){
-    if((r[0]||"").trim().toLowerCase()=="whatsapp"){
-      let v=(r[1]||"").trim(); if(/e/i.test(v)) v=Number(v).toFixed(0);
-      v=v.replace(/\D/g,""); if(v.length>=8) WHATSAPP=v;
-    }
-    if((r[0]||"").trim().toLowerCase()=="whatsapp cocina"){
-      let v=(r[1]||"").trim(); if(/e/i.test(v)) v=Number(v).toFixed(0);
-      v=v.replace(/\D/g,""); if(v.length>=8) COCINA=v;
-    }
+    if((r[0]||"").trim().toLowerCase()=="url del sistema"){ const v=(r[1]||"").trim(); if(/^https:\/\/script\.google\.com\//.test(v)) API=v; }
   }
 }).catch(()=>{}).then(()=>{
   topLinks();
@@ -214,21 +241,20 @@ gv("Config").then(t=>{
 // ===== ASISTENTE: preguntas y respuestas desde la pestaña "Respuestas" =====
 let faqs=[
  ["¿Cuál es el horario?","Atendemos de lunes a sábado, de 8:00 am a 6:00 pm."],
- ["¿Cómo hago un pedido?","Elige tu producto y toca «Pedir por WhatsApp»."]
+ ["¿Cómo hago un pedido?","Toca «Agregar» en lo que quieras y luego «Enviar pedido»."]
 ];
 const msgs=document.getElementById("bot-msgs"),bot=document.getElementById("bot");
 function burbuja(t,quien){const d=document.createElement("div");d.className="m "+quien;d.textContent=t;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight}
 function opciones(){
-  document.getElementById("bot-wa").href=wa("Hola, quiero más información");
   document.getElementById("bot-ops").innerHTML=faqs.map((f,i)=>`<button data-i="${i}">${esc(f[0])}</button>`).join("");
   document.querySelectorAll("#bot-ops button").forEach(b=>b.onclick=()=>{
     const f=faqs[b.dataset.i];burbuja(f[0],"u");
-    setTimeout(()=>{burbuja(f[1],"b");burbuja("¿Quieres más información? Escríbenos por WhatsApp y te atendemos directo.","b")},350);
+    setTimeout(()=>{burbuja(f[1],"b");burbuja(MESA?"¿Necesitas algo más? Toca «Llamar al mesonero» arriba.":"¿Algo más? Toca otra pregunta.","b")},350);
   });
 }
 let saludado=false;
 document.getElementById("bot-btn").onclick=()=>{bot.classList.toggle("open");
-  if(!saludado){saludado=true;burbuja("¡Hola! 👋 Toca una pregunta y te respondo al instante. Si necesitas algo más, escríbenos por WhatsApp.","b")}
+  if(!saludado){saludado=true;burbuja("¡Hola! 👋 Toca una pregunta y te respondo al instante.","b")}
   opciones();};
 document.getElementById("bot-x").onclick=()=>bot.classList.remove("open");
 gv("Respuestas").then(t=>{
