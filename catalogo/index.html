@@ -268,7 +268,7 @@ function pintarSeguimiento(estado){
   if(estado=="rechazado"){ box.innerHTML="<b>❌ Tu pedido no pudo ser aceptado.</b><div class='sg-info'>"+(MESA?"Llama al mesero para saber qué pasó.":"Comunícate con el negocio para saber qué pasó.")+"</div>"; return; }
   const i=Math.max(0,PASOS.findIndex(p=>p[0]==estado)), fin=estado=="entregado";
   const pct=Math.round((i+(fin?1:0.5))/PASOS.length*100);
-  box.innerHTML=`<div class="sg-top"><b>Tu pedido</b><span class="sg-num">N.º ${esc(String(SG.id))}</span></div>
+  box.innerHTML=`<div class="sg-top"><b>Tu pedido</b><span class="sg-num">N.º ${esc(String(SG.num||"…"))}</span></div>
    <div>Paso ${i+1} de ${PASOS.length}${fin?"":" · <span class='sg-vivo'>se actualiza solo</span>"}</div>
    <div class="sg-bar"><i style="width:${pct}%"></i></div>`+
    PASOS.map((p,j)=>`<div class="sg-paso ${j<i||fin?"hecho":j==i?"ahora":""}"><span class="pt">${j<i||fin?"✓":""}</span><div><b>${p[1]}</b>${j==i?"<small>"+p[2]+"</small>":""}</div></div>`).join("")+
@@ -278,7 +278,7 @@ function pintarSeguimiento(estado){
 function verEstado(id){
   fetch(API+"?accion=ver&id="+id).then(r=>r.json()).then(r=>{
     if(!r.ok) return;
-    if(SG){SG.ult=Date.now(); SG.estado=r.estado; try{localStorage.setItem("sg_pedido",JSON.stringify(SG))}catch(e){}}
+    if(SG){SG.ult=Date.now(); SG.estado=r.estado; if(r.num) SG.num=r.num; try{localStorage.setItem("sg_pedido",JSON.stringify(SG))}catch(e){}}
     pintarSeguimiento(r.estado);
     if(r.estado=="rechazado"||r.estado=="entregado") clearInterval(seguir);
   }).catch(()=>{});

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pedidos · Pantalla</title><style>*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,Roboto,sans-serif;background:#1d140e;color:#fff;min-height:100vh;display:flex;flex-direction:column}
+header{background:#5a3825;padding:14px 20px;display:flex;justify-content:space-between;align-items:center}
+header h1{font-family:Georgia,serif;font-size:clamp(1.3rem,3vw,2.2rem)}#hora{font-size:clamp(1rem,2.5vw,1.8rem);font-weight:700}
+main{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:4px}
+section{padding:16px}section h2{font-size:clamp(1.2rem,3.5vw,2.6rem);text-align:center;padding:10px;border-radius:14px;margin-bottom:14px}
+#prep h2{background:#7a5a3a}#list h2{background:#1e7a3c}
+.nums{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.n{background:#3a2a1e;border-radius:16px;padding:10px 16px;text-align:center;min-width:clamp(90px,16vw,170px)}
+.n b{display:block;font-size:clamp(2.2rem,7vw,5rem);line-height:1.1}.n span{font-size:clamp(.8rem,1.6vw,1.2rem);opacity:.85}
+#list .n{background:#27ae60;animation:luz 1.5s ease-in-out 4}#list .n.viejo{animation:none}
+@keyframes luz{50%{box-shadow:0 0 0 8px rgba(46,204,113,.5)}}
+.vacio{opacity:.5;text-align:center;font-size:1.2rem;padding:20px}
+#estado{text-align:center;font-size:.85rem;opacity:.6;padding:6px}
+.capa{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:9}
+.capa button{background:#27ae60;color:#fff;border:0;border-radius:14px;padding:18px 28px;font-size:1.3rem;font-weight:800}
+@media (max-width:600px){main{grid-template-columns:1fr}}
+</style></head><body>
+<header><h1>Dulcería Los Andes</h1><div id="hora"></div></header>
+<main><section id="prep"><h2>👨‍🍳 Preparando</h2><div class="nums" id="p"></div></section>
+<section id="list"><h2>✅ Listo · retira tu pedido</h2><div class="nums" id="l"></div></section></main>
+<div id="estado">Conectando…</div>
+<div class="capa" id="capa"><button id="go">Mostrar pantalla</button></div>
+<script>
+(function(){
+const SHEET_ID="1SkaZA4m6t6Ti7DRR4B7VbWyf49taEUTc_TKh-xkxX4Y";
+const $=id=>document.getElementById(id), esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let API="", vistos=null, audio=null;
+function parseCSV(t){const R=[];let r=[],c="",q=false;for(let i=0;i<t.length;i++){const x=t[i];if(q){if(x=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=x}else if(x=='"')q=true;else if(x==','){r.push(c);c=""}else if(x=='\n'){r.push(c);R.push(r);r=[];c=""}else if(x!='\r')c+=x}if(c||r.length){r.push(c);R.push(r)}return R}
+function sonar(){ try{ if(!audio) audio=new (window.AudioContext||window.webkitAudioContext)();
+  [0,0.3].forEach((t,i)=>{const o=audio.createOscillator(),g=audio.createGain();o.frequency.value=i?1046:784;o.connect(g);g.connect(audio.destination);g.gain.setValueAtTime(0.3,audio.currentTime+t);g.gain.exponentialRampToValueAtTime(0.001,audio.currentTime+t+0.35);o.start(audio.currentTime+t);o.stop(audio.currentTime+t+0.4)}); }catch(e){} }
+const caja=(o,viejo)=>`<div class="n ${viejo?"viejo":""}"><b>${esc(o.num)}</b><span>${esc(o.lugar)}</span></div>`;
+function cargar(){
+  fetch(API+"?accion=pantalla").then(r=>r.json()).then(r=>{
+    if(!r.ok) return;
+    const nuevos=r.listos.filter(o=>vistos&&!vistos.has(o.num));
+    $("p").innerHTML=r.preparando.length?r.preparando.map(o=>caja(o,true)).join(""):`<div class="vacio">—</div>`;
+    $("l").innerHTML=r.listos.length?r.listos.map(o=>caja(o,vistos&&vistos.has(o.num))).join(""):`<div class="vacio">—</div>`;
+    if(nuevos.length) sonar();
+    vistos=new Set(r.listos.map(o=>o.num));
+    $("estado").textContent="Actualizado "+new Date().toLocaleTimeString("es-VE",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  }).catch(()=>{$("estado").textContent="Sin conexión, reintentando…"});
+}
+setInterval(()=>{$("hora").textContent=new Date().toLocaleTimeString("es-VE",{hour:"2-digit",minute:"2-digit"})},1000);
+$("go").onclick=()=>{ $("capa").remove(); sonar(); try{document.documentElement.requestFullscreen()}catch(e){} };
+fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=Config&t=${Date.now()}`).then(r=>r.text()).then(t=>{
+  for(const r of parseCSV(t.trim()).slice(1)) if((r[0]||"").trim().toLowerCase()=="url del sistema") API=(r[1]||"").trim();
+  if(!/^https:\/\/script\.google\.com\//.test(API)){ $("estado").textContent="Falta la URL del sistema en Config."; return; }
+  cargar(); setInterval(cargar,5000);
+}).catch(()=>{$("estado").textContent="No se pudo leer la hoja."});
+})();
+</script></body></html>
