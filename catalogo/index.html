@@ -205,6 +205,21 @@ $("cuenta").onclick=()=>{
   }).catch(e=>aviso("⚠️ "+e.message));
 };
 setTimeout(()=>{pintarAcum();try{const c=JSON.parse(localStorage.getItem("cuenta_pend")||"null"); if(c&&c.mesa==MESA&&Date.now()-c.t<3*3600e3) esperarCuenta(c.id);}catch(e){}},0);
+// Cuando la caja cierra la mesa (cliente pagó), esta pantalla se limpia para el próximo cliente.
+function revisarMesa(){
+  if(!MESA||!API) return;
+  fetch(API+"?accion=mesa&mesa="+encodeURIComponent(MESA)).then(r=>r.json()).then(r=>{
+    if(!r.ok||!r.cierre) return;
+    const a=leerAcum(), viejo=x=>String(x||"0")<=r.cierre;
+    let limpio=false;
+    if(a.pedidos.some(p=>viejo(p.id))){ a.pedidos=a.pedidos.filter(p=>!viejo(p.id)); guardarAcum(a); limpio=true; }
+    try{ const g=JSON.parse(localStorage.getItem("sg_pedido")||"null"); if(g&&g.mesa==MESA&&viejo(g.id)){ localStorage.removeItem("sg_pedido"); if(SG&&SG.id==g.id){SG=null;clearInterval(seguir);$("seguimiento").style.display="none";pintarCarro();} limpio=true; } }catch(e){}
+    try{ const c=JSON.parse(localStorage.getItem("cuenta_pend")||"null"); if(c&&c.mesa==MESA&&viejo(c.id)){ /* la ventana de respuesta se muestra sola */ } }catch(e){}
+    if(limpio) aviso("✅ Mesa "+MESA+" lista para un nuevo pedido");
+  }).catch(()=>{});
+}
+setInterval(revisarMesa,20000);
+(function esperarAPI(){ if(API) revisarMesa(); else setTimeout(esperarAPI,500); })();
 if(MESA){
   $("bot-btn").style.display="none"; $("bot").style.display="none";
   document.title="Mesa "+MESA+" · Dulcería Los Andes";
@@ -283,7 +298,7 @@ $("enviar").onclick=()=>{
     carro={}; $("nota").value=""; $("seguimiento").style.display="block"; pintarCarro(); $("enviar").textContent="✅ Enviar pedido"; aviso("✅ Pedido enviado");
     SG={id:r.id,items:ks.map(k=>q.pedido.split("\n")[ks.indexOf(k)]),total:q.total.replace(/\.00$/,""),t:Date.now(),estado:"nuevo",mesa:MESA};
     try{localStorage.setItem("sg_pedido",JSON.stringify(SG))}catch(e){}
-    if(MESA){const a=leerAcum();a.pedidos.push({items:SG.items,total:Number(q.total),hora:new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})});guardarAcum(a);}
+    if(MESA){const a=leerAcum();a.pedidos.push({id:String(r.id),items:SG.items,total:Number(q.total),hora:new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})});guardarAcum(a);}
     pintarSeguimiento("nuevo"); clearInterval(seguir); verEstado(r.id); seguir=setInterval(()=>verEstado(r.id),6000);
     setTimeout(()=>$("seguimiento").scrollIntoView({behavior:"smooth",block:"center"}),300);
   }).catch(e=>{ $("enviar").disabled=false; $("enviar").textContent="✅ Enviar pedido"; aviso("⚠️ "+e.message); });

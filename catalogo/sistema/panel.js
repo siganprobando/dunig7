@@ -3,8 +3,8 @@
 const SHEET_ID = "1SkaZA4m6t6Ti7DRR4B7VbWyf49taEUTc_TKh-xkxX4Y";
 const ROL = window.ROL;
 const NOMBRES = {caja:"Caja", cocina:"Cocina", mesero:"Mesero", repartidor:"Repartidor"};
-const CON_NOMBRE = ROL=="mesero"||ROL=="repartidor";
-const CLAVE_NOMBRE = ROL=="mesero" ? "mesero_nombre" : "repartidor_nombre";
+const CON_NOMBRE = true;                     // todos entran con su nombre: cada paso queda firmado con hora y responsable
+const CLAVE_NOMBRE = ROL+"_nombre";
 const $ = id => document.getElementById(id);
 const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let API = "", PIN = localStorage.getItem("pin_"+ROL) || "", MESERO = localStorage.getItem(CLAVE_NOMBRE) || "";
@@ -21,6 +21,23 @@ function sonar(){
 const api = q => fetch(API+"?"+new URLSearchParams(q)).then(r=>r.json());
 
 function mins(h){ if(!h) return ""; const [a,b]=h.split(":").map(Number); const d=new Date(); let m=d.getHours()*60+d.getMinutes()-(a*60+b); if(m<0)m+=1440; return m<1?"ahora":"hace "+m+" min"; }
+
+// Línea de tiempo del pedido: hora de cada paso, quién lo hizo y cuántos minutos tardó (en rojo si pasa de LIMITE).
+let LIMITE=10;
+function aMin(h){ const m=String(h||"").match(/^(\d{1,2}):(\d{2})/); return m?(+m[1])*60+(+m[2]):null; }
+function linea(o){
+  if(o.Tipo!="pedido") return "";
+  const pasos=[["📥 Pedido",o.Hora,""],["🧾 Caja",o["Hora en cocina"],o.Cajero],["👨‍🍳 Listo",o["Hora listo"],o.Cocinero],[o.Mesa?"🍽️ Entregado":"🛵 Entregado",o["Hora entregado"],o["Hora entregado"]?o.Mesero:""]];
+  let ant=aMin(o.Hora), html=[];
+  for(let i=0;i<pasos.length;i++){
+    const [et,h,quien]=pasos[i];
+    if(!h){ if(ant!=null){ let m=aMin(new Date().toTimeString().slice(0,5))-ant; if(m<0)m+=1440; html.push(`<span class="tl-esp ${m>LIMITE?"tl-tarde":""}">⏳ ${et.split(" ")[1]}: esperando ${m} min</span>`);} break; }
+    let m=null; const x=aMin(h); if(i>0&&ant!=null&&x!=null){ m=x-ant; if(m<0)m+=1440; }
+    html.push(`<span class="${m!=null&&m>LIMITE?"tl-tarde":""}">${et} ${esc(h)}${m!=null?" ("+m+" min)":""}${quien?" · "+esc(quien):""}</span>`);
+    ant=x;
+  }
+  return `<div class="tl">${html.join(" → ")}</div>`;
+}
 
 // El menú guarda el delivery como "Dirección: … · nota". Se separa para que la dirección solo la vean caja y repartidor.
 function partir(n){ n=String(n||""); const m=n.match(/^Dirección:\s*(.*?)(?:\s·\s([\s\S]*))?$/); return m ? {dir:m[1], nota:m[2]||""} : {dir:"", nota:n}; }
@@ -75,7 +92,7 @@ function tarjeta(o){
     extra += `<div class="dir">📍 ${texto}${ROL=="repartidor"?`<br><a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destino)}">🧭 Cómo llegar</a>`:""}</div>`;
   }
   return `<div class="card ${clase}"><div class="top"><b>${titulo}</b><span>${esc(o.Hora)} · ${mins(o.Hora)}</span></div>
-    ${o.Tipo=="pedido"?`<div class="items">${items}</div>`:""}${nota?`<div class="nota">📝 ${esc(nota)}</div>`:""}${extra}${precio}
+    ${o.Tipo=="pedido"?`<div class="items">${items}</div>`:""}${nota?`<div class="nota">📝 ${esc(nota)}</div>`:""}${extra}${precio}${linea(o)}
     <div class="est">Estado: ${esc(o.Estado)}</div><div class="bts">${botones}</div></div>`;
 }
 
@@ -92,10 +109,11 @@ function importante(o){
   return o.Estado=="listo"||o.Tipo=="mesonero"||o.Tipo=="cuenta";
 }
 
-let ABIERTA="", ULTIMOS=[];
+let ABIERTA="", ULTIMOS=[], MESAS=[];
 function porMesa(ps){                       // caja: un cuadro por mesa; al tocarlo se abre y muestra sus pedidos
   ULTIMOS=ps; const g={}, orden=[];
   ps.forEach(o=>{ const k=o.Mesa?"Mesa "+o.Mesa:"🛵 Delivery"; if(!g[k]){g[k]=[];orden.push(k);} g[k].push(o); });
+  const cons={}; if(ROL=="caja") MESAS.forEach(m=>{ const k="Mesa "+m.mesa; cons[k]=m; if(!g[k]){g[k]=[];orden.push(k);} });
   orden.sort((a,b)=>a.startsWith("🛵")-b.startsWith("🛵")||a.localeCompare(b,"es",{numeric:true}));
   if(ABIERTA && !g[ABIERTA]) ABIERTA="";
   const fmt=n=>"$"+n.toFixed(2).replace(/\.00$/,"");
@@ -105,9 +123,13 @@ function porMesa(ps){                       // caja: un cuadro por mesa; al toca
     return `<button class="mesa-cuadro ${nuevos?"mesa-alerta":""} ${abierta?"mesa-abierta":""}" data-mesa="${esc(k)}">
       <span class="mc-nom">${esc(k)}</span>
       <span class="mc-est">${nuevos?`🔴 ${nuevos} ${ROL=="cocina"?"por preparar":"nuevo"+(nuevos>1?"s":"")}`:"✓ Al día"}</span>
+      ${cons[k]?`<span class="mc-det">🧾 Consumo abierto: ${fmt(Number(cons[k].total))}</span>`:""}
       <span class="mc-det">${l.length} ${ROL=="mesero"?(l.length>1?"avisos":"aviso"):(l.length>1?"pedidos":"pedido")}${ROL=="caja"?" · "+fmt(tot):""}</span></button>`;
   }).join("");
   const det = ABIERTA ? `<section class="mesa-detalle"><div class="md-top"><b>${esc(ABIERTA)}</b><button class="md-cerrar" data-mesa="${esc(ABIERTA)}">✕ Cerrar</button></div>
+      ${cons[ABIERTA]?`<div class="card"><b>🧾 Consumo de la ${esc(ABIERTA)} (${cons[ABIERTA].n} ${cons[ABIERTA].n>1?"pedidos":"pedido"})</b>
+        <div class="items">${esc(cons[ABIERTA].pedido).replace(/\n/g,"<br>")}</div><div class="tot">Total a cobrar: ${fmt(Number(cons[ABIERTA].total))}</div>
+        <div class="bts"><button data-cerrar="${esc(cons[ABIERTA].mesa)}" data-total="${fmt(Number(cons[ABIERTA].total))}" style="background:#1e7a3c">💵 Cliente pagó · cerrar mesa</button></div></div>`:""}
       <div style="display:grid;gap:10px">${g[ABIERTA].map(tarjeta).join("")}</div></section>` : `<p class="vacio" style="grid-column:1/-1;margin:4px 0">Toca una mesa para ver sus pedidos.</p>`;
   return `<div class="mesas-grid">${cuadros}</div>${det}`;
 }
@@ -116,8 +138,30 @@ function activarMesas(){
     ABIERTA = ABIERTA==b.dataset.mesa ? "" : b.dataset.mesa;
     $("lista").innerHTML=porMesa(ULTIMOS); activarMesas();
     $("lista").querySelectorAll("button[data-id]").forEach(x=>x.onclick=()=>cambiar(x));
+    activarCierre();
     if(ABIERTA){ const d=document.querySelector(".mesa-detalle"); d&&d.scrollIntoView({behavior:"smooth",block:"start"}); }
   });
+}
+function activarCierre(){
+  document.querySelectorAll("button[data-cerrar]").forEach(b=>b.onclick=()=>confirmarCierre(b));
+}
+// Ventana de alerta antes de cerrar: la cajera revisa el consumo y confirma que el cliente pagó todo.
+function confirmarCierre(b){
+  const m=MESAS.find(x=>x.mesa==b.dataset.cerrar); if(!m) return;
+  const v=document.createElement("div"); v.className="alerta-cierre";
+  v.innerHTML=`<div class="ac-caja"><div style="font-size:46px">⚠️</div><h3>¿De verdad quieres cerrar la Mesa ${esc(m.mesa)}?</h3>
+    <p>Antes de cerrar, <b>verifica bien que el cliente pagó todo correctamente</b>. Al cerrarla, su consumo se archiva y la mesa queda libre para un nuevo cliente. <b>No se puede deshacer.</b></p>
+    <div class="items" style="text-align:left;max-height:160px;overflow:auto">${esc(m.pedido).replace(/\n/g,"<br>")}</div>
+    <div class="ac-tot">Total a cobrar: ${b.dataset.total}</div>
+    <label class="ac-chk"><input type="checkbox" id="ac-ok"> Confirmo que recibí el pago completo</label>
+    <button id="ac-si" disabled>💵 Sí, cerrar la mesa</button><button id="ac-no">Cancelar, revisar de nuevo</button></div>`;
+  document.body.appendChild(v); sonar();
+  v.querySelector("#ac-ok").onchange=e=>{ v.querySelector("#ac-si").disabled=!e.target.checked; };
+  v.querySelector("#ac-no").onclick=()=>v.remove();
+  v.querySelector("#ac-si").onclick=()=>{
+    const si=v.querySelector("#ac-si"); si.disabled=true; si.textContent="Cerrando…";
+    api({accion:"cerrarmesa",rol:ROL,pin:PIN,mesa:m.mesa,mesero:MESERO}).then(r=>{ v.remove(); if(!r.ok) alert(r.error); else ABIERTA=""; cargar(); }).catch(()=>{ v.remove(); alert("Sin conexión"); cargar(); });
+  };
 }
 (function(){ const st=document.createElement("style"); st.textContent=`
 #lista:has(.mesas-grid){display:block}
@@ -130,6 +174,14 @@ function activarMesas(){
 .mesa-detalle{background:#3a2a1e;border-radius:16px;padding:12px}
 .md-top{display:flex;justify-content:space-between;align-items:center;color:#fff;font-size:1.2em;margin-bottom:10px}
 .md-cerrar{background:#5a4330;color:#fff;border:0;border-radius:20px;padding:8px 14px;font:inherit;font-size:.8em}
+.alerta-cierre{position:fixed;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px}
+.ac-caja{background:#fff;color:#222;border-radius:18px;padding:20px;max-width:380px;width:100%;text-align:center;border:4px solid #e67e22}
+.ac-caja h3{margin:6px 0 10px}.ac-caja p{line-height:1.45}.ac-tot{font-size:1.3em;font-weight:800;margin:10px 0}
+.ac-chk{display:flex;gap:8px;align-items:center;justify-content:center;margin:10px 0;font-weight:700}.ac-chk input{width:22px;height:22px}
+.ac-caja button{display:block;width:100%;margin-top:8px;padding:14px;border:0;border-radius:12px;font:inherit;font-weight:700;color:#fff;background:#1e7a3c}
+.ac-caja button:disabled{background:#9bbfa6}.ac-caja #ac-no{background:#7a7a7a}
+.tl{font-size:.85em;line-height:1.5;margin-top:6px;padding:6px 8px;background:rgba(0,0,0,.06);border-radius:8px}
+.tl-tarde{color:#c0392b;font-weight:700}.tl-esp{opacity:.9}
 @media (prefers-reduced-motion:reduce){.mesa-alerta{animation:none}}`; document.head.appendChild(st); })();
 
 function cargar(){
@@ -137,14 +189,16 @@ function cargar(){
   api({accion:"lista",rol:ROL,pin:PIN}).then(r=>{
     if(!r.ok){ if(r.error=="PIN"){ localStorage.removeItem("pin_"+ROL); PIN=""; pedirPin("PIN incorrecto"); } else $("estado").textContent="⚠️ "+r.error; return; }
     $("estado").textContent="🟢 Conectado · "+new Date().toLocaleTimeString("es-VE",{hour:"2-digit",minute:"2-digit"});
+    MESAS = r.mesas || [];
     const ps = filtrar(r.pedidos.map(o=>Object.assign(o,{Telefono:o["Teléfono"]})));
     const claves = ps.filter(importante).map(o=>o.ID+o.Estado);
     if(vistos && claves.some(k=>!vistos.has(k))) sonar();
     vistos = new Set(claves);
     const escribiendo = document.activeElement && document.activeElement.tagName=="TEXTAREA";
-    if(!escribiendo) $("lista").innerHTML = ps.length ? (ROL!="repartidor" ? porMesa(ps.reverse()) : ps.reverse().map(tarjeta).join("")) : `<p class="vacio">Sin pedidos por ahora. Esta pantalla se actualiza sola.</p>`;
+    if(!escribiendo) $("lista").innerHTML = (ps.length||(ROL=="caja"&&MESAS.length)) ? (ROL!="repartidor" ? porMesa(ps.reverse()) : ps.reverse().map(tarjeta).join("")) : `<p class="vacio">Sin pedidos por ahora. Esta pantalla se actualiza sola.</p>`;
     $("lista").querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>cambiar(b));
     if(ROL!="repartidor") activarMesas();
+    activarCierre();
     if(ROL=="caja") $("ventas").textContent = "Hoy: "+r.pedidosHoy+" pedidos · $"+Number(r.ventasHoy).toFixed(2)+"  |  Semana: $"+Number(r.ventasSemana).toFixed(2);
   }).catch(()=>{$("estado").textContent="🔴 Sin conexión, reintentando…"}).finally(()=>{ocupado=false});
 }
@@ -174,7 +228,9 @@ $("activar").onclick=()=>{ $("activar").closest(".capa").style.display="none"; s
 document.title = NOMBRES[ROL]+" · Pedidos";
 $("rol").textContent = NOMBRES[ROL] + (CON_NOMBRE&&MESERO?" · "+MESERO:"");
 fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=Config&t=${Date.now()}`).then(r=>r.text()).then(t=>{
-  for(const r of parseCSV(t.trim()).slice(1)) if((r[0]||"").trim().toLowerCase()=="url del sistema") API=(r[1]||"").trim();
+  for(const r of parseCSV(t.trim()).slice(1)){ const k=(r[0]||"").trim().toLowerCase();
+    if(k=="url del sistema") API=(r[1]||"").trim();
+    if(k=="minutos de alerta" && parseInt(r[1],10)>0) LIMITE=parseInt(r[1],10); }
   if(!/^https:\/\/script\.google\.com\//.test(API)){ $("estado").textContent="⚠️ Falta la «URL del sistema» en la pestaña Config de la hoja."; return; }
   setInterval(()=>{ if(PIN && $("login").style.display!="flex") cargar(); }, 5000);
 }).catch(()=>{$("estado").textContent="⚠️ No se pudo leer la hoja."});
