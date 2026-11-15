@@ -153,15 +153,52 @@ $("wa-top").onclick=()=>{
   if(!MESA){document.querySelector("main").scrollIntoView({behavior:"smooth"});return}
   enviarSistema({tipo:"mesonero",mesa:MESA}).then(()=>aviso("🙋 Listo, el mesero viene a tu mesa")).catch(e=>aviso("⚠️ "+e.message));
 };
+let AUDIO=null, cuentaInt=null;
+function timbre(){
+  try{ AUDIO=AUDIO||new (window.AudioContext||window.webkitAudioContext)(); AUDIO.resume&&AUDIO.resume();
+    [0,0.25,0.5].forEach((t,i)=>{const o=AUDIO.createOscillator(),g=AUDIO.createGain();o.type="sine";o.frequency.value=[880,1175,1568][i];
+      g.gain.setValueAtTime(0.0001,AUDIO.currentTime+t);g.gain.exponentialRampToValueAtTime(0.4,AUDIO.currentTime+t+0.03);g.gain.exponentialRampToValueAtTime(0.0001,AUDIO.currentTime+t+0.35);
+      o.connect(g);g.connect(AUDIO.destination);o.start(AUDIO.currentTime+t);o.stop(AUDIO.currentTime+t+0.4);});
+  }catch(e){}
+  try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}
+}
+function ventana(html){
+  let v=$("ventana-cuenta");
+  if(!v){ v=document.createElement("div"); v.id="ventana-cuenta";
+    v.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px";
+    document.body.appendChild(v); }
+  v.innerHTML=`<div style="background:#fff;border-radius:18px;padding:22px;max-width:360px;width:100%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.4);animation:sgLuz 1.4s ease-in-out 3">${html}
+    <button class="btn" style="margin-top:14px;width:100%" onclick="document.getElementById('ventana-cuenta').remove()">Entendido</button></div>`;
+}
+function verCuenta(id){
+  fetch(API+"?accion=ver&id="+id).then(r=>r.json()).then(r=>{
+    if(!r.ok||r.estado!="atendido") return;
+    clearInterval(cuentaInt); try{localStorage.removeItem("cuenta_pend")}catch(e){}
+    $("cuenta").disabled=false; $("cuenta").textContent="🧾 Pedir la cuenta";
+    timbre();
+    ventana(`<div style="font-size:44px">🧾</div><h3 style="margin:6px 0">Respuesta del mesero</h3>
+      <p style="font-size:1.1em">${esc(r.respuesta||"Ya voy con tu cuenta.")}</p>
+      ${r.total?`<p style="font-size:1.3em"><b>Total: $${Number(r.total).toFixed(2).replace(/\.00$/,"")}</b></p>`:""}
+      ${r.mesero?`<small>Te atiende: ${esc(r.mesero)}</small>`:""}`);
+  }).catch(()=>{});
+}
+function esperarCuenta(id){ $("cuenta").disabled=true; $("cuenta").textContent="⏳ Esperando respuesta del mesero…"; clearInterval(cuentaInt); cuentaInt=setInterval(()=>verCuenta(id),5000); }
 $("cuenta").onclick=()=>{
-  enviarSistema({tipo:"cuenta",mesa:MESA}).then(()=>aviso("🧾 Pedimos tu cuenta, ya te la llevan")).catch(e=>aviso("⚠️ "+e.message));
+  timbre(); // desbloquea el sonido en el teléfono
+  enviarSistema({tipo:"cuenta",mesa:MESA}).then(r=>{
+    aviso("🧾 Le avisamos al mesero. Te responderá aquí mismo.");
+    try{localStorage.setItem("cuenta_pend",JSON.stringify({id:r.id,mesa:MESA,t:Date.now()}))}catch(e){}
+    esperarCuenta(r.id);
+  }).catch(e=>aviso("⚠️ "+e.message));
 };
+setTimeout(()=>{try{const c=JSON.parse(localStorage.getItem("cuenta_pend")||"null"); if(c&&c.mesa==MESA&&Date.now()-c.t<3*3600e3) esperarCuenta(c.id);}catch(e){}},0);
 if(MESA){
+  $("bot-btn").style.display="none"; $("bot").style.display="none";
   document.title="Mesa "+MESA+" · Dulcería Los Andes";
   $("tag").textContent="🍽️ Estás en la Mesa "+MESA; $("tag").classList.add("mesa-tag");
   document.querySelector(".hero p").textContent="Pide desde tu mesa: elige, envía y te lo llevamos.";
   $("wa-top").textContent="🙋 Llamar al mesonero";
-  $("pasos").innerHTML="<li>Toca “Agregar” en lo que quieras.</li><li>Abre tu pedido abajo y toca “Enviar pedido”.</li><li>Sigue tu pedido aquí mismo: te lo llevamos a la Mesa "+MESA+". Al final, pide la cuenta desde aquí.</li>";
+  $("pasos").innerHTML="<li>Toca “Agregar” en lo que quieras.</li><li>Abre tu pedido abajo y toca “Enviar pedido”.</li><li>Sigue tu pedido aquí mismo: te lo llevamos a la Mesa "+MESA+". Al final, pide la cuenta desde aquí: el mesero te responde en esta misma pantalla.</li>";
   $("carro-tit").textContent="Pedido · Mesa "+MESA; $("cuenta").style.display="flex";
 } else { $("datos").style.display="block";
 }

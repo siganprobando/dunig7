@@ -50,7 +50,10 @@ function tarjeta(o){
   const {dir, nota} = partir(o.Nota);
   const lugar = o.Mesa ? "Mesa "+esc(o.Mesa) : (ROL=="cocina" ? "🛵 Para delivery" : "Delivery · "+esc(o.Cliente));
   if(o.Tipo=="mesonero"){ titulo="🙋 "+lugar+" llama al mesero"; clase="alerta"; botones=`<button data-id="${o.ID}" data-n="atendido">✓ Ya voy</button>`; }
-  else if(o.Tipo=="cuenta"){ titulo="🧾 "+lugar+" pide la cuenta"; clase="alerta"; botones= ROL=="caja" ? `<button data-id="${o.ID}" data-n="atendido">✓ Cobrada</button>` : ""; }
+  else if(o.Tipo=="cuenta"){ titulo="🧾 "+lugar+" pide la cuenta"; clase="alerta";
+    botones= ROL=="mesero" ? `<div class="cuenta-r" style="width:100%"><div><b>Cuenta: ${o.Pedido?"":"sin pedidos registrados"}</b></div>${o.Pedido?`<div class="items">${items}</div><div class="tot">Total: $${esc(o.Total)}</div>`:""}
+      <textarea id="msg-${o.ID}" rows="2" style="width:100%;margin:6px 0;padding:6px;border-radius:8px;border:1px solid #ccc" placeholder="Mensaje para la mesa (opcional)">Ya voy con tu cuenta.</textarea>
+      <button data-id="${o.ID}" data-n="atendido">📨 Responder a la mesa</button></div>` : ""; }
   else {
     titulo="🍽️ "+lugar;
     if(ROL=="caja" && o.Estado=="nuevo") botones=`<button data-id="${o.ID}" data-n="en cocina">✓ Confirmar y enviar a cocina</button><button class="no" data-id="${o.ID}" data-n="rechazado">✕ Rechazar</button>`;
@@ -76,13 +79,13 @@ function tarjeta(o){
 }
 
 function filtrar(ps){
-  if(ROL=="caja") return ps.filter(o=>(o.Tipo=="pedido")||o.Tipo=="cuenta");
+  if(ROL=="caja") return ps.filter(o=>o.Tipo=="pedido");
   if(ROL=="cocina") return ps.filter(o=>o.Tipo=="pedido"&&o.Estado=="en cocina");
   if(ROL=="repartidor") return ps.filter(o=>o.Tipo=="pedido"&&!o.Mesa&&(o.Estado=="listo"||(o.Estado=="en camino"&&o.Mesero==MESERO)));
   return ps.filter(o=>o.Mesa&&((o.Tipo=="pedido"&&o.Estado=="listo")||o.Tipo=="mesonero"||o.Tipo=="cuenta"));
 }
 function importante(o){
-  if(ROL=="caja") return (o.Tipo=="pedido"&&o.Estado=="nuevo")||o.Tipo=="cuenta";
+  if(ROL=="caja") return o.Tipo=="pedido"&&o.Estado=="nuevo";
   if(ROL=="cocina") return o.Estado=="en cocina";
   if(ROL=="repartidor") return o.Estado=="listo";
   return o.Estado=="listo"||o.Tipo=="mesonero"||o.Tipo=="cuenta";
@@ -97,14 +100,16 @@ function cargar(){
     const claves = ps.filter(importante).map(o=>o.ID+o.Estado);
     if(vistos && claves.some(k=>!vistos.has(k))) sonar();
     vistos = new Set(claves);
-    $("lista").innerHTML = ps.length ? ps.reverse().map(tarjeta).join("") : `<p class="vacio">Sin pedidos por ahora. Esta pantalla se actualiza sola.</p>`;
+    const escribiendo = document.activeElement && document.activeElement.tagName=="TEXTAREA";
+    if(!escribiendo) $("lista").innerHTML = ps.length ? ps.reverse().map(tarjeta).join("") : `<p class="vacio">Sin pedidos por ahora. Esta pantalla se actualiza sola.</p>`;
     $("lista").querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>cambiar(b));
     if(ROL=="caja") $("ventas").textContent = "Hoy: "+r.pedidosHoy+" pedidos · $"+Number(r.ventasHoy).toFixed(2)+"  |  Semana: $"+Number(r.ventasSemana).toFixed(2);
   }).catch(()=>{$("estado").textContent="🔴 Sin conexión, reintentando…"}).finally(()=>{ocupado=false});
 }
 function cambiar(b){
   b.disabled=true; b.textContent="Enviando…";
-  api({accion:"cambiar",rol:ROL,pin:PIN,id:b.dataset.id,nuevo:b.dataset.n,mesero:MESERO}).then(r=>{ if(!r.ok) alert(r.error); cargar(); }).catch(()=>{alert("Sin conexión");cargar()});
+  const m=document.getElementById("msg-"+b.dataset.id);
+  api({accion:"cambiar",rol:ROL,pin:PIN,id:b.dataset.id,nuevo:b.dataset.n,mesero:MESERO,msg:m?m.value.trim():""}).then(r=>{ if(!r.ok) alert(r.error); cargar(); }).catch(()=>{alert("Sin conexión");cargar()});
 }
 
 function pedirPin(msg){
