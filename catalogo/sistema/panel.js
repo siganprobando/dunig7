@@ -84,7 +84,7 @@ if($("cerrar")) $("cerrar").onclick=()=>{
   if(!confirm("¿Cerrar la semana? Se guarda el total en «Ventas semanales», los pedidos pasan a «Historial» y la bandeja queda limpia.")) return;
   api({accion:"cerrar",pin:PIN}).then(r=>{ alert(r.ok?"Semana cerrada: "+r.pedidos+" pedidos, $"+Number(r.total).toFixed(2):r.error); cargar(); });
 };
-$("activar").onclick=()=>{ $("activar").parentNode.style.display="none"; sonar(); if(!PIN) pedirPin(); else cargar(); };
+$("activar").onclick=()=>{ $("activar").closest(".capa").style.display="none"; sonar(); if(!PIN) pedirPin(); else cargar(); };
 
 document.title = NOMBRES[ROL]+" · Pedidos";
 $("rol").textContent = NOMBRES[ROL] + (ROL=="mesero"&&MESERO?" · "+MESERO:"");
