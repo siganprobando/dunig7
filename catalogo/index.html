@@ -143,6 +143,7 @@ const SHEET_ID = "1SkaZA4m6t6Ti7DRR4B7VbWyf49taEUTc_TKh-xkxX4Y";
 let API = ""; // "URL del sistema" en la pestaña Config de la hoja
 // =========================================================================
 const MESA = (new URLSearchParams(location.search).get("mesa")||"").replace(/[^\w -]/g,"").slice(0,12);
+const KIOSCO = new URLSearchParams(location.search).get("kiosco")=="1" && !MESA;   // autoservicio: paga en caja con su número y retira en el mostrador
 const $ = id => document.getElementById(id);
 function aviso(t){const a=$("aviso");a.textContent=t;a.style.display="block";clearTimeout(a._t);a._t=setTimeout(()=>a.style.display="none",3500)}
 function enviarSistema(q){
@@ -228,6 +229,12 @@ if(MESA){
   $("wa-top").textContent="🙋 Llamar al mesonero";
   $("pasos").innerHTML="<li>Toca “Agregar” en lo que quieras.</li><li>Abre tu pedido abajo y toca “Enviar pedido”.</li><li>Sigue tu pedido aquí mismo: te lo llevamos a la Mesa "+MESA+". Para lo que necesites o para tu cuenta, toca «Solicitar al mesero»: te responde en esta misma pantalla.</li>";
   $("carro-tit").textContent="Pedido · Mesa "+MESA; $("cuenta").style.display="flex";
+} else if(KIOSCO){
+  $("bot-btn").style.display="none"; $("bot").style.display="none"; $("wa-top").style.display="none";
+  document.title="Pide aquí · Dulcería Los Andes";
+  $("tag").textContent="🏪 Autoservicio"; document.querySelector(".hero p").textContent="Elige, envía tu pedido y recibe tu número.";
+  $("pasos").innerHTML="<li>Toca “Agregar” en lo que quieras.</li><li>Abre tu pedido abajo y toca “Enviar pedido”.</li><li>Recibe tu número, paga en caja y retíralo en el mostrador cuando aparezca en «Listo».</li>";
+  $("carro-tit").textContent="Tu pedido";
 } else { $("datos").style.display="block";
 }
 topLinks();
@@ -250,7 +257,7 @@ function pintarCarro(){
   $("nota").style.display=sigue?"none":"";
   $("carro-tot").style.display=(sigue&&vacio)?"none":"";
   $("enviar").style.display=(sigue&&vacio)?"none":"";
-  if(!MESA) $("datos").style.display=(sigue&&vacio)?"none":"block";
+  if(!MESA&&!KIOSCO) $("datos").style.display=(sigue&&vacio)?"none":"block";
   if(sigue&&vacio) $("carro-items").innerHTML="";
 }
 let ultimo={ks:[],tot:0}, seguir=null;
@@ -286,6 +293,7 @@ function verEstado(id){
 $("enviar").onclick=()=>{
   const {ks,tot}=ultimo; if(!ks.length) return;
   const nota=$("nota").value.trim(), q={tipo:"pedido",mesa:MESA,pedido:ks.map(k=>carro[k]+" x "+k).join("\n"),total:tot.toFixed(2),nota};
+  if(KIOSCO){ q.mesa="Kiosco"; return enviarKiosco(q,ks); }
   if(!MESA){
     q.cliente=$("cli-nombre").value.trim(); q.tel=$("cli-tel").value.trim();
     if(!q.cliente||!q.tel){ aviso("Escribe tu nombre y teléfono"); return; }
@@ -304,7 +312,33 @@ $("enviar").onclick=()=>{
   }).catch(e=>{ $("enviar").disabled=false; $("enviar").textContent="✅ Enviar pedido"; aviso("⚠️ "+e.message); });
 };
 setTimeout(function(){try{const g=JSON.parse(localStorage.getItem("sg_pedido")||"null");
-  if(g&&g.mesa==MESA&&Date.now()-g.t<6*3600e3&&g.estado!="entregado"&&g.estado!="rechazado"){SG=g;$("seguimiento").style.display="block";pintarSeguimiento(g.estado);pintarCarro();verEstado(g.id);seguir=setInterval(()=>verEstado(g.id),6000);}}catch(e){}},0);
+  if(!KIOSCO&&g&&g.mesa==MESA&&Date.now()-g.t<6*3600e3&&g.estado!="entregado"&&g.estado!="rechazado"){SG=g;$("seguimiento").style.display="block";pintarSeguimiento(g.estado);pintarCarro();verEstado(g.id);seguir=setInterval(()=>verEstado(g.id),6000);}}catch(e){}},0);
+// ===== KIOSCO: al enviar, ventana grande con el número de orden y la pantalla queda lista para el siguiente cliente =====
+function enviarKiosco(q,ks){
+  $("enviar").disabled=true; $("enviar").textContent="Enviando…";
+  enviarSistema(q).then(r=>{
+    carro={}; $("nota").value=""; pintarCarro(); $("enviar").textContent="✅ Enviar pedido"; $("carro").classList.remove("open");
+    const v=document.createElement("div"); v.id="kio-num";
+    v.innerHTML=`<div class="kio-caja"><div class="kio-t">Tu número de orden</div><div class="kio-n">${esc(String(r.num||"—"))}</div>
+      <div class="kio-items">${q.pedido.split("\n").map(esc).join("<br>")}</div><div class="kio-tot">Total: $${esc(q.total.replace(/\.00$/,""))}</div>
+      <ol class="kio-pasos"><li>Paga en <b>caja</b> diciendo tu número.</li><li>Retira tu pedido en el <b>mostrador</b> cuando tu número aparezca en <b>«Listo»</b>.</li></ol>
+      <button class="btn" id="kio-ok">👍 Entendido · nuevo pedido</button><div class="kio-seg" id="kio-seg"></div></div>`;
+    document.body.appendChild(v); timbre();
+    let s=30; const cerrar=()=>{ clearInterval(t); v.remove(); window.scrollTo({top:0,behavior:"smooth"}); };
+    const t=setInterval(()=>{ s--; $("kio-seg").textContent="Se cierra en "+s+" s"; if(s<=0) cerrar(); },1000);
+    $("kio-ok").onclick=cerrar;
+  }).catch(e=>{ $("enviar").disabled=false; $("enviar").textContent="✅ Enviar pedido"; aviso("⚠️ "+e.message); });
+}
+if(KIOSCO){                                   // si nadie toca la pantalla en 2 minutos, se vacía el pedido para el siguiente cliente
+  let quieto=Date.now(); ["click","touchstart","keydown"].forEach(ev=>document.addEventListener(ev,()=>quieto=Date.now(),true));
+  setInterval(()=>{ if(Date.now()-quieto>120000 && Object.values(carro).some(x=>x>0)){ carro={}; $("nota").value=""; pintarCarro(); $("carro").classList.remove("open"); window.scrollTo({top:0}); } },10000);
+  const st=document.createElement("style"); st.textContent=`#kio-num{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:90;display:flex;align-items:center;justify-content:center;padding:16px}
+.kio-caja{background:#fff;border-radius:24px;padding:24px;max-width:420px;width:100%;text-align:center;border:5px solid var(--verde)}
+.kio-t{font-size:1.3rem;font-weight:700;color:var(--cafe)}.kio-n{font-size:6rem;font-weight:900;line-height:1.1;color:var(--cafe)}
+.kio-items{background:#faf5ef;border-radius:12px;padding:10px;margin:10px 0;line-height:1.5}.kio-tot{font-size:1.3rem;font-weight:800;margin-bottom:8px}
+.kio-pasos{text-align:left;margin:8px 0 14px 20px;line-height:1.5}.kio-caja .btn{width:100%;justify-content:center}.kio-seg{margin-top:8px;font-size:.85rem;color:#888}`;
+  document.head.appendChild(st);
+}
 let GPS="";
 $("gps-btn").onclick=()=>{
   if(!navigator.geolocation){ aviso("Tu teléfono no permite ubicación"); return; }

@@ -65,7 +65,7 @@ function tarjeta(o){
   let botones="", clase="", titulo="";
   const items = esc(o.Pedido).replace(/\n/g,"<br>");
   const {dir, nota} = partir(o.Nota);
-  const lugar = o.Mesa ? "Mesa "+esc(o.Mesa) : (ROL=="cocina" ? "🛵 Para delivery" : "Delivery · "+esc(o.Cliente));
+  const lugar = o.Mesa=="Kiosco" ? "🏪 Kiosco · para retirar" : o.Mesa ? "Mesa "+esc(o.Mesa) : (ROL=="cocina" ? "🛵 Para delivery" : "Delivery · "+esc(o.Cliente));
   if(o.Tipo=="mesonero"){ titulo="🙋 "+lugar+" llama al mesero"; clase="alerta"; botones=`<button data-id="${o.ID}" data-n="atendido">✓ Ya voy</button>`; }
   else if(o.Tipo=="cuenta"){ titulo="🙋 "+lugar+" solicita al mesero"; clase="alerta";
     botones= ROL=="mesero" ? `<div style="width:100%"><div><b>Consumo acumulado de la mesa:</b></div>${o.Pedido?`<div class="items">${items}</div><div class="tot">Total: $${esc(o.Total)}</div>`:"<div>Sin pedidos registrados</div>"}
@@ -79,6 +79,7 @@ function tarjeta(o){
     if(ROL=="repartidor" && o.Estado=="listo"){ clase="alerta"; titulo="🛵 Delivery disponible"; botones=`<button data-id="${o.ID}" data-n="en camino">🙋 Aceptar esta entrega</button>`; }
     if(ROL=="repartidor" && o.Estado=="en camino"){ titulo="🛵 "+lugar+" · tu entrega"; botones=`<button data-id="${o.ID}" data-n="entregado">✓ Entregado al cliente</button>`; }
     if(ROL=="caja" && o.Estado=="en camino" && o.Mesero) titulo+=" · 🛵 "+esc(o.Mesero);
+    if(ROL=="caja" && o.Estado=="listo" && o.Mesa=="Kiosco"){ clase="alerta"; titulo="✅ N.º "+esc(o.Num)+" listo · entregar en mostrador"; botones=`<button data-id="${o.ID}" data-n="entregado">✓ Entregado en mostrador</button>`; }
     if(ROL=="mesero" && o.Estado=="listo"){ clase="alerta"; titulo="✅ "+lugar+" · listo para llevar"; botones=`<button data-id="${o.ID}" data-n="entregado">✓ Entregado</button>`; }
   }
   const precio = ROL=="caja" && o.Tipo=="pedido" ? `<div class="tot">Total: $${esc(o.Total)}</div>` : "";
@@ -100,10 +101,10 @@ function filtrar(ps){
   if(ROL=="caja") return ps.filter(o=>o.Tipo=="pedido");
   if(ROL=="cocina") return ps.filter(o=>o.Tipo=="pedido"&&o.Estado=="en cocina");
   if(ROL=="repartidor") return ps.filter(o=>o.Tipo=="pedido"&&!o.Mesa&&(o.Estado=="listo"||(o.Estado=="en camino"&&o.Mesero==MESERO)));
-  return ps.filter(o=>o.Mesa&&((o.Tipo=="pedido"&&o.Estado=="listo")||o.Tipo=="mesonero"||o.Tipo=="cuenta"));
+  return ps.filter(o=>o.Mesa&&o.Mesa!="Kiosco"&&((o.Tipo=="pedido"&&o.Estado=="listo")||o.Tipo=="mesonero"||o.Tipo=="cuenta"));
 }
 function importante(o){
-  if(ROL=="caja") return o.Tipo=="pedido"&&o.Estado=="nuevo";
+  if(ROL=="caja") return o.Tipo=="pedido"&&(o.Estado=="nuevo"||(o.Estado=="listo"&&o.Mesa=="Kiosco"));
   if(ROL=="cocina") return o.Estado=="en cocina";
   if(ROL=="repartidor") return o.Estado=="listo";
   return o.Estado=="listo"||o.Tipo=="mesonero"||o.Tipo=="cuenta";
@@ -112,9 +113,9 @@ function importante(o){
 let ABIERTA="", ULTIMOS=[], MESAS=[];
 function porMesa(ps){                       // caja: un cuadro por mesa; al tocarlo se abre y muestra sus pedidos
   ULTIMOS=ps; const g={}, orden=[];
-  ps.forEach(o=>{ const k=o.Mesa?"Mesa "+o.Mesa:"🛵 Delivery"; if(!g[k]){g[k]=[];orden.push(k);} g[k].push(o); });
+  ps.forEach(o=>{ const k=o.Mesa=="Kiosco"?"🏪 Kiosco":o.Mesa?"Mesa "+o.Mesa:"🛵 Delivery"; if(!g[k]){g[k]=[];orden.push(k);} g[k].push(o); });
   const cons={}; if(ROL=="caja") MESAS.forEach(m=>{ const k="Mesa "+m.mesa; cons[k]=m; if(!g[k]){g[k]=[];orden.push(k);} });
-  orden.sort((a,b)=>a.startsWith("🛵")-b.startsWith("🛵")||a.localeCompare(b,"es",{numeric:true}));
+  orden.sort((a,b)=>(a.startsWith("🏪")?-1:a.startsWith("🛵")?1:0)-(b.startsWith("🏪")?-1:b.startsWith("🛵")?1:0)||a.localeCompare(b,"es",{numeric:true}));
   if(ABIERTA && !g[ABIERTA]) ABIERTA="";
   const fmt=n=>"$"+n.toFixed(2).replace(/\.00$/,"");
   const cuadros=orden.map(k=>{
