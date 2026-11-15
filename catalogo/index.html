@@ -166,7 +166,7 @@ function pintarCarro(){
   $("enviar").disabled=!ks.length;
 }
 let ultimo={ks:[],tot:0}, seguir=null;
-const PASOS=[["nuevo","📥 Recibido en caja"],["en cocina","👨‍🍳 Preparando en cocina"],["listo",(MESA?"✅ Listo, ya va a tu mesa":"✅ Listo para salir")],["entregado",(MESA?"🍽️ Servido. ¡Buen provecho!":"🚚 Entregado. ¡Gracias!")]];
+const PASOS=[["nuevo","📥 Recibido en caja"],["en cocina","👨‍🍳 Preparando en cocina"],["listo",(MESA?"✅ Listo, ya va a tu mesa":"✅ Listo para salir")],...(MESA?[]:[["en camino","🛵 En camino a tu dirección"]]),["entregado",(MESA?"🍽️ Servido. ¡Buen provecho!":"🚚 Entregado. ¡Gracias!")]];
 function verEstado(id){
   fetch(API+"?accion=ver&id="+id).then(r=>r.json()).then(r=>{
     if(!r.ok) return;

@@ -36,11 +36,13 @@ function tarjeta(o){
     titulo="🍽️ "+lugar;
     if(ROL=="caja" && o.Estado=="nuevo") botones=`<button data-id="${o.ID}" data-n="en cocina">✓ Confirmar y enviar a cocina</button><button class="no" data-id="${o.ID}" data-n="rechazado">✕ Rechazar</button>`;
     if(ROL=="cocina" && o.Estado=="en cocina") botones=`<button data-id="${o.ID}" data-n="listo">✓ Listo para servir</button>`;
-    if(ROL=="repartidor" && o.Estado=="listo"){ clase="alerta"; titulo="🛵 "+lugar+" · listo para salir"; botones=`<button data-id="${o.ID}" data-n="entregado">✓ Entregado al cliente</button>`; }
+    if(ROL=="repartidor" && o.Estado=="listo"){ clase="alerta"; titulo="🛵 Delivery disponible"; botones=`<button data-id="${o.ID}" data-n="en camino">🙋 Aceptar esta entrega</button>`; }
+    if(ROL=="repartidor" && o.Estado=="en camino"){ titulo="🛵 "+lugar+" · tu entrega"; botones=`<button data-id="${o.ID}" data-n="entregado">✓ Entregado al cliente</button>`; }
+    if(ROL=="caja" && o.Estado=="en camino" && o.Mesero) titulo+=" · 🛵 "+esc(o.Mesero);
     if(ROL=="mesero" && o.Estado=="listo"){ clase="alerta"; titulo="✅ "+lugar+" · listo para llevar"; botones=`<button data-id="${o.ID}" data-n="entregado">✓ Entregado</button>`; }
   }
   const precio = ROL=="caja" && o.Tipo=="pedido" ? `<div class="tot">Total: $${esc(o.Total)}</div>` : "";
-  const verDatos = (ROL=="caja"||ROL=="repartidor") && !o.Mesa;
+  const verDatos = (ROL=="caja"||(ROL=="repartidor"&&o.Estado=="en camino")) && !o.Mesa;
   let extra = "";
   if(verDatos && o.Telefono) extra += `<div class="sub">📞 <a href="tel:${esc(o.Telefono)}">${esc(o.Telefono)}</a></div>`;
   if(verDatos && dir){
@@ -57,7 +59,7 @@ function tarjeta(o){
 function filtrar(ps){
   if(ROL=="caja") return ps.filter(o=>(o.Tipo=="pedido")||o.Tipo=="cuenta");
   if(ROL=="cocina") return ps.filter(o=>o.Tipo=="pedido"&&o.Estado=="en cocina");
-  if(ROL=="repartidor") return ps.filter(o=>o.Tipo=="pedido"&&o.Estado=="listo"&&!o.Mesa);
+  if(ROL=="repartidor") return ps.filter(o=>o.Tipo=="pedido"&&!o.Mesa&&(o.Estado=="listo"||(o.Estado=="en camino"&&o.Mesero==MESERO)));
   return ps.filter(o=>o.Mesa&&((o.Tipo=="pedido"&&o.Estado=="listo")||o.Tipo=="mesonero"||o.Tipo=="cuenta"));
 }
 function importante(o){
