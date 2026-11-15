@@ -92,19 +92,45 @@ function importante(o){
   return o.Estado=="listo"||o.Tipo=="mesonero"||o.Tipo=="cuenta";
 }
 
-function porMesa(ps){                       // caja: un cuadro por mesa y uno para delivery
-  const g={}, orden=[];
+let ABIERTA="", ULTIMOS=[];
+function porMesa(ps){                       // caja: un cuadro por mesa; al tocarlo se abre y muestra sus pedidos
+  ULTIMOS=ps; const g={}, orden=[];
   ps.forEach(o=>{ const k=o.Mesa?"Mesa "+o.Mesa:"🛵 Delivery"; if(!g[k]){g[k]=[];orden.push(k);} g[k].push(o); });
   orden.sort((a,b)=>a.startsWith("🛵")-b.startsWith("🛵")||a.localeCompare(b,"es",{numeric:true}));
-  return orden.map(k=>{
+  if(ABIERTA && !g[ABIERTA]) ABIERTA="";
+  const fmt=n=>"$"+n.toFixed(2).replace(/\.00$/,"");
+  const cuadros=orden.map(k=>{
     const l=g[k], tot=l.reduce((s,o)=>s+(o.Tipo=="pedido"?parseFloat(String(o.Total).replace(",","."))||0:0),0);
-    const nuevos=l.filter(importante).length;
-    return `<section style="background:#3a2a1e;border-radius:16px;padding:10px;margin:0 0 14px;${nuevos?"box-shadow:0 0 0 3px #e74c3c":""}">
-      <div style="display:flex;justify-content:space-between;align-items:center;color:#fff;font-weight:800;font-size:1.15em;padding:4px 6px 10px">
-        <span>${esc(k)}${nuevos?` · <span style="color:#ffb3a8">${nuevos} nuevo${nuevos>1?"s":""}</span>`:""}</span><span>$${tot.toFixed(2).replace(/\.00$/,"")}</span></div>
-      <div style="display:grid;gap:10px">${l.map(tarjeta).join("")}</div></section>`;
+    const nuevos=l.filter(importante).length, abierta=k==ABIERTA;
+    return `<button class="mesa-cuadro ${nuevos?"mesa-alerta":""} ${abierta?"mesa-abierta":""}" data-mesa="${esc(k)}">
+      <span class="mc-nom">${esc(k)}</span>
+      <span class="mc-est">${nuevos?`🔴 ${nuevos} nuevo${nuevos>1?"s":""}`:"✓ Al día"}</span>
+      <span class="mc-det">${l.length} pedido${l.length>1?"s":""} · ${fmt(tot)}</span></button>`;
   }).join("");
+  const det = ABIERTA ? `<section class="mesa-detalle"><div class="md-top"><b>${esc(ABIERTA)}</b><button class="md-cerrar" data-mesa="${esc(ABIERTA)}">✕ Cerrar</button></div>
+      <div style="display:grid;gap:10px">${g[ABIERTA].map(tarjeta).join("")}</div></section>` : `<p class="vacio" style="grid-column:1/-1;margin:4px 0">Toca una mesa para ver sus pedidos.</p>`;
+  return `<div class="mesas-grid">${cuadros}</div>${det}`;
 }
+function activarMesas(){
+  document.querySelectorAll("[data-mesa]").forEach(b=>b.onclick=()=>{
+    ABIERTA = ABIERTA==b.dataset.mesa ? "" : b.dataset.mesa;
+    $("lista").innerHTML=porMesa(ULTIMOS); activarMesas();
+    $("lista").querySelectorAll("button[data-id]").forEach(x=>x.onclick=()=>cambiar(x));
+    if(ABIERTA){ const d=document.querySelector(".mesa-detalle"); d&&d.scrollIntoView({behavior:"smooth",block:"start"}); }
+  });
+}
+(function(){ const st=document.createElement("style"); st.textContent=`
+#lista:has(.mesas-grid){display:block}
+.mesas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:14px}
+.mesa-cuadro{display:flex;flex-direction:column;gap:4px;align-items:flex-start;text-align:left;background:#3a2a1e;color:#fff;border:3px solid #5a4330;border-radius:16px;padding:14px;font:inherit;cursor:pointer;min-height:100px}
+.mesa-cuadro .mc-nom{font-size:1.3em;font-weight:800}.mesa-cuadro .mc-est{font-weight:700}.mesa-cuadro .mc-det{opacity:.85;font-size:.9em}
+.mesa-alerta{background:#c0392b;border-color:#ff6b5b;animation:mesaLuz 1s ease-in-out infinite}
+.mesa-abierta{outline:4px solid #f0b93a;outline-offset:2px}
+@keyframes mesaLuz{0%,100%{background:#c0392b;box-shadow:0 0 0 0 rgba(231,76,60,.7)}50%{background:#e74c3c;box-shadow:0 0 18px 4px rgba(231,76,60,.8)}}
+.mesa-detalle{background:#3a2a1e;border-radius:16px;padding:12px}
+.md-top{display:flex;justify-content:space-between;align-items:center;color:#fff;font-size:1.2em;margin-bottom:10px}
+.md-cerrar{background:#5a4330;color:#fff;border:0;border-radius:20px;padding:8px 14px;font:inherit;font-size:.8em}
+@media (prefers-reduced-motion:reduce){.mesa-alerta{animation:none}}`; document.head.appendChild(st); })();
 
 function cargar(){
   if(ocupado) return; ocupado=true;
@@ -118,6 +144,7 @@ function cargar(){
     const escribiendo = document.activeElement && document.activeElement.tagName=="TEXTAREA";
     if(!escribiendo) $("lista").innerHTML = ps.length ? (ROL=="caja" ? porMesa(ps.reverse()) : ps.reverse().map(tarjeta).join("")) : `<p class="vacio">Sin pedidos por ahora. Esta pantalla se actualiza sola.</p>`;
     $("lista").querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>cambiar(b));
+    if(ROL=="caja") activarMesas();
     if(ROL=="caja") $("ventas").textContent = "Hoy: "+r.pedidosHoy+" pedidos · $"+Number(r.ventasHoy).toFixed(2)+"  |  Semana: $"+Number(r.ventasSemana).toFixed(2);
   }).catch(()=>{$("estado").textContent="🔴 Sin conexión, reintentando…"}).finally(()=>{ocupado=false});
 }
