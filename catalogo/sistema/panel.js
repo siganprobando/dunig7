@@ -121,7 +121,7 @@ function activarMesas(){
 }
 (function(){ const st=document.createElement("style"); st.textContent=`
 #lista:has(.mesas-grid){display:block}
-.mesas-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:14px}
+.mesas-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px}
 .mesa-cuadro{display:flex;flex-direction:column;gap:4px;align-items:flex-start;text-align:left;background:#3a2a1e;color:#fff;border:3px solid #5a4330;border-radius:16px;padding:14px;font:inherit;cursor:pointer;min-height:100px}
 .mesa-cuadro .mc-nom{font-size:1.3em;font-weight:800}.mesa-cuadro .mc-est{font-weight:700}.mesa-cuadro .mc-det{opacity:.85;font-size:.9em}
 .mesa-alerta{background:#c0392b;border-color:#ff6b5b;animation:mesaLuz 1s ease-in-out infinite}
