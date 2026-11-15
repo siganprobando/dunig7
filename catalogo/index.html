@@ -142,6 +142,32 @@ footer{color:var(--gris)}
 @keyframes subir{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes hojaSube{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.btn,.card,.chip.on,#carro-bar{animation:none}}
+/* Cuadrícula de dos en fila y tarjetas pro */
+.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (min-width:760px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}}
+.card img{aspect-ratio:1}
+.card .b{padding:12px 12px 14px;gap:4px}
+.card h3{font-size:1rem;font-weight:800;line-height:1.25}
+.card p{font-size:.82rem;line-height:1.35}
+.price{font-size:1.45rem;font-weight:900;background:linear-gradient(110deg,#e89400,#f5b400 40%,#d18a00);-webkit-background-clip:text;background-clip:text;color:transparent;margin:4px 0 6px}
+.price:before{display:none}
+.card .btn{width:100%;padding:12px 8px;font-size:.95rem;font-weight:600;margin-top:auto}
+@media (prefers-reduced-motion:reduce){.btn{animation:none}}
+/* Movimiento */
+.card{opacity:0;transform:translateY(26px) scale(.97);animation:none;transition:opacity .6s ease,transform .6s cubic-bezier(.2,.8,.2,1),box-shadow .3s}
+.card.ver{opacity:1;transform:none}.card.ver.agotado{opacity:.55}
+.card{position:relative}
+.card:after{content:"";position:absolute;top:0;left:-60%;width:40%;height:62%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.45),transparent);transform:skewX(-18deg);animation:destello 5.5s ease-in-out infinite;pointer-events:none}
+.card:nth-child(2n):after{animation-delay:2.7s}
+@keyframes destello{0%,70%{left:-60%}100%{left:130%}}
+.card img{animation:respira 7s ease-in-out infinite}
+@keyframes respira{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.card .btn:active{transform:scale(.94)}
+.hero h1,.hero p,.hero .tag,.hero .btn{animation:entra .8s cubic-bezier(.2,.8,.2,1) both}
+.hero p{animation-delay:.12s}.hero .btn{animation-delay:.24s}
+@keyframes entra{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.chip{transition:transform .2s,background .2s}.chip:active{transform:scale(.93)}
+@media (prefers-reduced-motion:reduce){.card{opacity:1;transform:none;transition:none}.card:after,.card img,.hero *{animation:none}}
 </style>
 </head>
 <body>
@@ -494,6 +520,10 @@ gv("Respuestas").then(t=>{
   const rs=parseCSV(t.trim()).slice(1).filter(r=>(r[0]||"").trim()&&(r[1]||"").trim()).map(r=>[r[0].trim(),r[1].trim()]);
   if(rs.length) faqs=rs; opciones();
 }).catch(()=>opciones());
+// Movimiento: cada tarjeta aparece al entrar en pantalla
+(function(){const io="IntersectionObserver" in window?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("ver");io.unobserve(e.target)}}),{threshold:.12}):null;
+ const mira=()=>document.querySelectorAll(".card:not(.ver)").forEach((c,i)=>{c.style.transitionDelay=(i%2)*90+"ms"; io?io.observe(c):c.classList.add("ver")});
+ new MutationObserver(mira).observe(document.getElementById("grid"),{childList:true}); mira();})();
 </script>
 </body>
 </html>
