@@ -180,6 +180,9 @@ html{scroll-behavior:smooth}
 #kio-num{animation:entra .35s ease}.kio-caja{animation:zoom .45s cubic-bezier(.2,.9,.25,1.2)}
 @keyframes zoom{from{transform:scale(.8);opacity:0}to{transform:none;opacity:1}}
 .vuela{position:fixed;z-index:80;width:46px;height:46px;border-radius:50%;object-fit:cover;box-shadow:0 8px 20px rgba(0,0,0,.25);transition:all .7s cubic-bezier(.5,-.2,.3,1);pointer-events:none}
+.card.elegida{animation:elegida .7s cubic-bezier(.2,.9,.25,1.2)}
+@keyframes elegida{0%{box-shadow:0 0 0 0 rgba(255,200,40,.9)}40%{transform:scale(1.04);box-shadow:0 0 0 6px rgba(255,200,40,.55)}100%{transform:none;box-shadow:0 10px 30px rgba(20,20,40,.06)}}
+.btn:active,.chip:active,.it button:active{transform:scale(.92);transition:transform .08s}
 </style>
 </head>
 <body>
@@ -538,7 +541,7 @@ gv("Respuestas").then(t=>{
  new MutationObserver(mira).observe(document.getElementById("grid"),{childList:true}); mira();})();
 // Transiciones: onda al tocar botones y producto que vuela al pedido
 document.addEventListener("pointerdown",e=>{const b=e.target.closest(".btn,.chip,#carro-bar");if(!b)return;const r=b.getBoundingClientRect(),d=Math.max(r.width,r.height),o=document.createElement("span");o.className="onda";o.style.cssText=`width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;b.appendChild(o);setTimeout(()=>o.remove(),650)});
-document.addEventListener("click",e=>{const b=e.target.closest("[data-add]");if(!b)return;const im=b.closest(".card")&&b.closest(".card").querySelector("img");const bar=$("carro-bar");if(!im)return;
+document.addEventListener("click",e=>{const b=e.target.closest("[data-add]");if(!b)return;const cd=b.closest(".card");if(cd){cd.classList.remove("elegida");void cd.offsetWidth;cd.classList.add("elegida");}const im=b.closest(".card")&&b.closest(".card").querySelector("img");const bar=$("carro-bar");if(!im)return;
  const r=im.getBoundingClientRect(),v=document.createElement("img");v.src=im.src;v.className="vuela";v.style.left=(r.left+r.width/2-23)+"px";v.style.top=(r.top+r.height/2-23)+"px";document.body.appendChild(v);
  requestAnimationFrame(()=>{const t=bar.getBoundingClientRect();v.style.left=(t.left+t.width/2-23)+"px";v.style.top=(t.top||innerHeight-40)+"px";v.style.transform="scale(.3)";v.style.opacity=".2"});setTimeout(()=>v.remove(),760)},true);
 </script>
