@@ -1,0 +1,36 @@
+/* Estilo moderno, fondo blanco, para todas las pantallas del personal y la pantalla de números */
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap");
+:root{--oro:linear-gradient(110deg,#f5a300 0%,#ffd23f 25%,#fff3b0 50%,#ffd23f 75%,#f5a300 100%);--tinta:#16161d;--gris:#6b6b76;--linea:#e9e9ef;--suave:#f6f6f9}
+@keyframes brillo{to{background-position:200% center}}
+html body{font-family:Poppins,system-ui,Roboto,sans-serif;background:var(--suave);color:var(--tinta)}
+html header{background:#fff;color:var(--tinta);border-bottom:3px solid #ffd23f;box-shadow:0 6px 20px rgba(20,20,40,.05)}
+html header h1{font-weight:800;letter-spacing:-.3px}
+html header button{background:var(--suave);color:var(--tinta);border:1px solid var(--linea);border-radius:999px}
+html #estado,html .vacio{color:var(--gris);opacity:1}
+html #ventas{color:#b07800}
+html .card{background:#fff;color:var(--tinta);border:1px solid var(--linea);border-left:6px solid #ffc93c;border-radius:20px;box-shadow:0 10px 28px rgba(20,20,40,.06)}
+html .nota{background:#fff7d6;border-radius:12px}
+html .dir{background:#eef5ff;border-radius:12px}html .dist{background:#eaf8ef;border-radius:12px}
+html .bts button{border-radius:999px;background:linear-gradient(135deg,#22c55e,#16a34a);box-shadow:0 6px 18px rgba(22,163,74,.3)}
+html .bts button.no{background:linear-gradient(135deg,#ff5a6e,#e11d48);box-shadow:0 6px 18px rgba(225,29,72,.25)}
+html .capa{background:rgba(15,15,25,.55);backdrop-filter:blur(6px)}
+html .caja{background:#fff;color:var(--tinta);border-radius:26px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+html .caja button{background:var(--oro);background-size:200% auto;color:#1a1200;border-radius:999px;animation:brillo 5s linear infinite}
+html .caja input{border:1.5px solid var(--linea)!important;border-radius:14px!important;background:var(--suave)!important}
+html .mesa-cuadro{background:#fff;color:var(--tinta);border:1.5px solid var(--linea);border-radius:20px;box-shadow:0 8px 22px rgba(20,20,40,.06)}
+html .mesa-cuadro.mesa-alerta{color:#fff;border-color:#ff6b5b}
+html .mesa-bloq{background:#ececf1;color:var(--gris)}
+html .mesa-detalle{background:#fff;border:1px solid var(--linea);border-radius:22px;box-shadow:0 10px 28px rgba(20,20,40,.06)}
+html .md-top{color:var(--tinta)}
+html .md-cerrar{background:var(--suave);color:var(--tinta);border:1px solid var(--linea)}
+html .mesa-cerrar,html .pos-big,html .ac-caja button{border-radius:999px}
+html .num-ped,html .pos-mini{background:var(--tinta)}
+html .pos-pagos button{border-color:var(--linea);color:var(--tinta);border-radius:14px}
+html .pos-pagos button.sel{background:var(--oro);background-size:200% auto;color:#1a1200;border-color:transparent}
+html .pos-caja,html .ac-caja{border-radius:26px}
+/* Pantalla de números */
+html main section h2{border-radius:999px;color:#fff}
+html #prep h2{background:linear-gradient(135deg,#f59e0b,#d97706)}html #list h2{background:linear-gradient(135deg,#22c55e,#16a34a)}
+html .n{background:#fff;color:var(--tinta);border:1.5px solid var(--linea);border-radius:22px;box-shadow:0 10px 28px rgba(20,20,40,.07)}
+html #list .n b{background:var(--oro);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:brillo 4s linear infinite}
+html #blq{background:rgba(255,255,255,.97);color:var(--tinta)}
