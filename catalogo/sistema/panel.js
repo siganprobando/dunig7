@@ -92,6 +92,20 @@ function importante(o){
   return o.Estado=="listo"||o.Tipo=="mesonero"||o.Tipo=="cuenta";
 }
 
+function porMesa(ps){                       // caja: un cuadro por mesa y uno para delivery
+  const g={}, orden=[];
+  ps.forEach(o=>{ const k=o.Mesa?"Mesa "+o.Mesa:"🛵 Delivery"; if(!g[k]){g[k]=[];orden.push(k);} g[k].push(o); });
+  orden.sort((a,b)=>a.startsWith("🛵")-b.startsWith("🛵")||a.localeCompare(b,"es",{numeric:true}));
+  return orden.map(k=>{
+    const l=g[k], tot=l.reduce((s,o)=>s+(o.Tipo=="pedido"?parseFloat(String(o.Total).replace(",","."))||0:0),0);
+    const nuevos=l.filter(importante).length;
+    return `<section style="background:#3a2a1e;border-radius:16px;padding:10px;margin:0 0 14px;${nuevos?"box-shadow:0 0 0 3px #e74c3c":""}">
+      <div style="display:flex;justify-content:space-between;align-items:center;color:#fff;font-weight:800;font-size:1.15em;padding:4px 6px 10px">
+        <span>${esc(k)}${nuevos?` · <span style="color:#ffb3a8">${nuevos} nuevo${nuevos>1?"s":""}</span>`:""}</span><span>$${tot.toFixed(2).replace(/\.00$/,"")}</span></div>
+      <div style="display:grid;gap:10px">${l.map(tarjeta).join("")}</div></section>`;
+  }).join("");
+}
+
 function cargar(){
   if(ocupado) return; ocupado=true;
   api({accion:"lista",rol:ROL,pin:PIN}).then(r=>{
@@ -102,7 +116,7 @@ function cargar(){
     if(vistos && claves.some(k=>!vistos.has(k))) sonar();
     vistos = new Set(claves);
     const escribiendo = document.activeElement && document.activeElement.tagName=="TEXTAREA";
-    if(!escribiendo) $("lista").innerHTML = ps.length ? ps.reverse().map(tarjeta).join("") : `<p class="vacio">Sin pedidos por ahora. Esta pantalla se actualiza sola.</p>`;
+    if(!escribiendo) $("lista").innerHTML = ps.length ? (ROL=="caja" ? porMesa(ps.reverse()) : ps.reverse().map(tarjeta).join("")) : `<p class="vacio">Sin pedidos por ahora. Esta pantalla se actualiza sola.</p>`;
     $("lista").querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>cambiar(b));
     if(ROL=="caja") $("ventas").textContent = "Hoy: "+r.pedidosHoy+" pedidos · $"+Number(r.ventasHoy).toFixed(2)+"  |  Semana: $"+Number(r.ventasSemana).toFixed(2);
   }).catch(()=>{$("estado").textContent="🔴 Sin conexión, reintentando…"}).finally(()=>{ocupado=false});
