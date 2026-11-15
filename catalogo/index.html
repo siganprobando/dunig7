@@ -478,9 +478,10 @@ if(KIOSCO){                                   // si nadie toca la pantalla en 2 
 #kio-ini small{font-size:1rem;font-weight:400;margin-top:12px;opacity:.85}`; document.head.appendChild(st2);
   const enCompleta=()=>document.fullscreenElement||document.webkitFullscreenElement||matchMedia("(display-mode: fullscreen)").matches||matchMedia("(display-mode: standalone)").matches;
   const completa=()=>{ if(enCompleta()) return; const d=document.documentElement; try{(d.requestFullscreen||d.webkitRequestFullscreen).call(d,{navigationUI:"hide"}).catch(()=>{});}catch(e){} };
-  const ini=document.createElement("div"); ini.id="kio-ini"; ini.innerHTML="👆 Toca la pantalla para pedir<small>Autoservicio · Dulcería Los Andes</small>";
+  const ini=document.createElement("div"); ini.id="kio-ini"; ini.innerHTML="👆 Toca o pulsa OK para pedir<small>Autoservicio · Dulcería Los Andes</small>";
   const mostrarIni=()=>{ if(!enCompleta()&&!document.getElementById("kio-ini")) document.body.appendChild(ini); };
   ini.onclick=()=>{ completa(); ini.remove(); };
+  document.addEventListener("keydown",e=>{ if(document.getElementById("kio-ini")){ e.preventDefault(); ini.click(); } });
   document.addEventListener("click",completa,true);
   document.addEventListener("fullscreenchange",()=>setTimeout(mostrarIni,300));
   document.addEventListener("contextmenu",e=>e.preventDefault());
