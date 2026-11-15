@@ -25,6 +25,25 @@ function mins(h){ if(!h) return ""; const [a,b]=h.split(":").map(Number); const 
 // El menú guarda el delivery como "Dirección: … · nota". Se separa para que la dirección solo la vean caja y repartidor.
 function partir(n){ n=String(n||""); const m=n.match(/^Dirección:\s*(.*?)(?:\s·\s([\s\S]*))?$/); return m ? {dir:m[1], nota:m[2]||""} : {dir:"", nota:n}; }
 
+// Repartidor: su GPS para calcular la distancia hasta cada entrega antes de aceptarla.
+let YO=null, gpsMsg="";
+function iniciarGPS(){
+  if(ROL!="repartidor"||!navigator.geolocation) return;
+  navigator.geolocation.watchPosition(p=>{ YO={lat:p.coords.latitude,lng:p.coords.longitude}; gpsMsg=""; },
+    e=>{ gpsMsg = e.code==1 ? "Activa la ubicación del navegador para ver distancias" : "Buscando tu GPS…"; },
+    {enableHighAccuracy:true,maximumAge:15000,timeout:30000});
+}
+function coords(dir){ const g=String(dir||"").match(/^(-?\d+\.\d+),\s*(-?\d+\.\d+)/); return g?{lat:+g[1],lng:+g[2]}:null; }
+function km(a,b){ const R=6371,r=x=>x*Math.PI/180,dLa=r(b.lat-a.lat),dLo=r(b.lng-a.lng);
+  const h=Math.sin(dLa/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLo/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
+function distancia(dir){
+  const c=coords(dir);
+  if(!c) return `<div class="dist">📏 Distancia no disponible (dirección escrita a mano)</div>`;
+  if(!YO) return `<div class="dist">📏 ${gpsMsg||"Buscando tu GPS…"}</div>`;
+  const d=km(YO,c), calle=d*1.3, min=Math.max(3,Math.round(calle/25*60));
+  return `<div class="dist">📏 A <b>${calle.toFixed(1)} km</b> de ti por calle (aprox.) · ${d.toFixed(1)} km en línea recta · ~${min} min en moto</div>`;
+}
+
 function tarjeta(o){
   let botones="", clase="", titulo="";
   const items = esc(o.Pedido).replace(/\n/g,"<br>");
@@ -43,7 +62,7 @@ function tarjeta(o){
   }
   const precio = ROL=="caja" && o.Tipo=="pedido" ? `<div class="tot">Total: $${esc(o.Total)}</div>` : "";
   const verDatos = (ROL=="caja"||(ROL=="repartidor"&&o.Estado=="en camino")) && !o.Mesa;
-  let extra = "";
+  let extra = ROL=="repartidor" && !o.Mesa ? distancia(dir) : "";
   if(verDatos && o.Telefono) extra += `<div class="sub">📞 <a href="tel:${esc(o.Telefono)}">${esc(o.Telefono)}</a></div>`;
   if(verDatos && dir){
     const g = dir.match(/^(-?\d+\.\d+),\s*(-?\d+\.\d+)\s*(?:\(Ref:\s*([\s\S]*)\))?$/);
@@ -103,7 +122,7 @@ if($("cerrar")) $("cerrar").onclick=()=>{
   if(!confirm("¿Cerrar la semana? Se guarda el total en «Ventas semanales», los pedidos pasan a «Historial» y la bandeja queda limpia.")) return;
   api({accion:"cerrar",pin:PIN}).then(r=>{ alert(r.ok?"Semana cerrada: "+r.pedidos+" pedidos, $"+Number(r.total).toFixed(2):r.error); cargar(); });
 };
-$("activar").onclick=()=>{ $("activar").closest(".capa").style.display="none"; sonar(); if(!PIN) pedirPin(); else cargar(); };
+$("activar").onclick=()=>{ $("activar").closest(".capa").style.display="none"; sonar(); iniciarGPS(); if(!PIN) pedirPin(); else cargar(); };
 
 document.title = NOMBRES[ROL]+" · Pedidos";
 $("rol").textContent = NOMBRES[ROL] + (CON_NOMBRE&&MESERO?" · "+MESERO:"");
