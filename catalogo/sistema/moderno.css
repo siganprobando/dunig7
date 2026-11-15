@@ -1,6 +1,6 @@
 /* Estilo moderno, fondo blanco, para todas las pantallas del personal y la pantalla de números */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap");
-:root{--oro:linear-gradient(110deg,#f5a300 0%,#ffd23f 25%,#fff3b0 50%,#ffd23f 75%,#f5a300 100%);--tinta:#16161d;--gris:#6b6b76;--linea:#e9e9ef;--suave:#f6f6f9}
+:root{--oro:linear-gradient(110deg,#f5a300 0%,#ffd23f 25%,#fff3b0 50%,#ffd23f 75%,#f5a300 100%);--tinta:#ffffff;--gris:#a3a3b0;--linea:#262631;--suave:#14141b}
 @keyframes brillo{to{background-position:200% center}}
 html body{font-family:Poppins,system-ui,Roboto,sans-serif;background:var(--suave);color:var(--tinta)}
 html header{background:#fff;color:var(--tinta);border-bottom:3px solid #ffd23f;box-shadow:0 6px 20px rgba(20,20,40,.05)}
@@ -34,3 +34,28 @@ html #prep h2{background:linear-gradient(135deg,#f59e0b,#d97706)}html #list h2{b
 html .n{background:#fff;color:var(--tinta);border:1.5px solid var(--linea);border-radius:22px;box-shadow:0 10px 28px rgba(20,20,40,.07)}
 html #list .n b{background:var(--oro);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:brillo 4s linear infinite}
 html #blq{background:rgba(255,255,255,.97);color:var(--tinta)}
+
+/* Fondo negro, igual a la tienda */
+html body{background:#0a0a0f;color:#fff}
+html header{background:#0f0f15;color:#fff;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+html header button{background:#1c1c25;color:#fff;border-color:#2e2e3a}
+html #ventas{color:#ffd23f}
+html .card{background:linear-gradient(180deg,#17171f,#101016);color:#fff;border-color:#262631;border-left-color:#ffc93c;box-shadow:0 14px 34px rgba(0,0,0,.45)}
+html .card *{border-color:#2e2e3a}
+html .nota{background:#2a2310;color:#ffe9a6}html .dir{background:#10223a;color:#cfe3ff}html .dist{background:#0f2a1a;color:#a8f0c2}
+html .caja{background:#121218;color:#fff;border:1px solid #262631}
+html .caja input{background:#1a1a22!important;color:#fff!important;border-color:#2e2e3a!important}
+html .mesa-cuadro{background:linear-gradient(180deg,#17171f,#101016);color:#fff;border-color:#262631;box-shadow:0 10px 26px rgba(0,0,0,.45)}
+html .mesa-bloq{background:#1c1c25;color:#a3a3b0}
+html .mesa-detalle{background:#121218;border-color:#262631}
+html .md-cerrar{background:#1c1c25;color:#fff;border-color:#2e2e3a}
+html .num-ped,html .pos-mini{background:#ffd23f;color:#1a1200}
+html .pos-caja,html .ac-caja{background:#121218;color:#fff}
+html .pos-top button,html .pos-ed{background:#1c1c25;color:#fff}
+html .pos-tot{background:#1a1a22}html .pos-cam{background:#2a2310;color:#ffe9a6}
+html .pos-q button{background:#1c1c25;color:#fff;border-color:#2e2e3a}
+html .pos-pagos button{background:#1c1c25;color:#fff;border-color:#2e2e3a}
+html .pos-pagos button.sel{color:#1a1200}
+html .n{background:linear-gradient(180deg,#17171f,#101016);color:#fff;border-color:#262631;box-shadow:0 14px 34px rgba(0,0,0,.5)}
+html #blq{background:rgba(10,10,15,.97);color:#fff}
+html input,html select,html textarea{background:#1a1a22;color:#fff;border-color:#2e2e3a}
