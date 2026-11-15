@@ -1,11 +1,13 @@
-// Pantallas de caja, cocina y mesero. Cada HTML define window.ROL antes de cargar este archivo.
+// Pantallas de caja, cocina, mesero y repartidor. Cada HTML define window.ROL antes de cargar este archivo.
 (function(){
 const SHEET_ID = "1SkaZA4m6t6Ti7DRR4B7VbWyf49taEUTc_TKh-xkxX4Y";
 const ROL = window.ROL;
-const NOMBRES = {caja:"Caja", cocina:"Cocina", mesero:"Mesero"};
+const NOMBRES = {caja:"Caja", cocina:"Cocina", mesero:"Mesero", repartidor:"Repartidor"};
+const CON_NOMBRE = ROL=="mesero"||ROL=="repartidor";
+const CLAVE_NOMBRE = ROL=="mesero" ? "mesero_nombre" : "repartidor_nombre";
 const $ = id => document.getElementById(id);
 const esc = s => String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-let API = "", PIN = localStorage.getItem("pin_"+ROL) || "", MESERO = localStorage.getItem("mesero_nombre") || "";
+let API = "", PIN = localStorage.getItem("pin_"+ROL) || "", MESERO = localStorage.getItem(CLAVE_NOMBRE) || "";
 let vistos = null, audio = null, ocupado = false;
 
 function parseCSV(t){const R=[];let r=[],c="",q=false;for(let i=0;i<t.length;i++){const x=t[i];if(q){if(x=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=x}else if(x=='"')q=true;else if(x==','){r.push(c);c=""}else if(x=='\n'){r.push(c);R.push(r);r=[];c=""}else if(x!='\r')c+=x}if(c||r.length){r.push(c);R.push(r)}return R}
@@ -20,33 +22,43 @@ const api = q => fetch(API+"?"+new URLSearchParams(q)).then(r=>r.json());
 
 function mins(h){ if(!h) return ""; const [a,b]=h.split(":").map(Number); const d=new Date(); let m=d.getHours()*60+d.getMinutes()-(a*60+b); if(m<0)m+=1440; return m<1?"ahora":"hace "+m+" min"; }
 
+// El menú guarda el delivery como "Dirección: … · nota". Se separa para que la dirección solo la vean caja y repartidor.
+function partir(n){ n=String(n||""); const m=n.match(/^Dirección:\s*(.*?)(?:\s·\s([\s\S]*))?$/); return m ? {dir:m[1], nota:m[2]||""} : {dir:"", nota:n}; }
+
 function tarjeta(o){
   let botones="", clase="", titulo="";
   const items = esc(o.Pedido).replace(/\n/g,"<br>");
-  const lugar = o.Mesa ? "Mesa "+esc(o.Mesa) : "Delivery · "+esc(o.Cliente);
+  const {dir, nota} = partir(o.Nota);
+  const lugar = o.Mesa ? "Mesa "+esc(o.Mesa) : (ROL=="cocina" ? "🛵 Para delivery" : "Delivery · "+esc(o.Cliente));
   if(o.Tipo=="mesonero"){ titulo="🙋 "+lugar+" llama al mesero"; clase="alerta"; botones=`<button data-id="${o.ID}" data-n="atendido">✓ Ya voy</button>`; }
   else if(o.Tipo=="cuenta"){ titulo="🧾 "+lugar+" pide la cuenta"; clase="alerta"; botones= ROL=="caja" ? `<button data-id="${o.ID}" data-n="atendido">✓ Cobrada</button>` : ""; }
   else {
     titulo="🍽️ "+lugar;
     if(ROL=="caja" && o.Estado=="nuevo") botones=`<button data-id="${o.ID}" data-n="en cocina">✓ Confirmar y enviar a cocina</button><button class="no" data-id="${o.ID}" data-n="rechazado">✕ Rechazar</button>`;
     if(ROL=="cocina" && o.Estado=="en cocina") botones=`<button data-id="${o.ID}" data-n="listo">✓ Listo para servir</button>`;
+    if(ROL=="repartidor" && o.Estado=="listo"){ clase="alerta"; titulo="🛵 "+lugar+" · listo para salir"; botones=`<button data-id="${o.ID}" data-n="entregado">✓ Entregado al cliente</button>`; }
     if(ROL=="mesero" && o.Estado=="listo"){ clase="alerta"; titulo="✅ "+lugar+" · listo para llevar"; botones=`<button data-id="${o.ID}" data-n="entregado">✓ Entregado</button>`; }
   }
   const precio = ROL=="caja" && o.Tipo=="pedido" ? `<div class="tot">Total: $${esc(o.Total)}</div>` : "";
-  const extra = ROL=="caja" && o.Telefono ? `<div class="sub">📞 ${esc(o.Telefono)}</div>` : "";
+  const verDatos = (ROL=="caja"||ROL=="repartidor") && !o.Mesa;
+  let extra = "";
+  if(verDatos && o.Telefono) extra += `<div class="sub">📞 <a href="tel:${esc(o.Telefono)}">${esc(o.Telefono)}</a></div>`;
+  if(verDatos && dir) extra += `<div class="dir">📍 ${esc(dir)}${ROL=="repartidor"?` · <a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dir)}">Ver mapa</a>`:""}</div>`;
   return `<div class="card ${clase}"><div class="top"><b>${titulo}</b><span>${esc(o.Hora)} · ${mins(o.Hora)}</span></div>
-    ${o.Tipo=="pedido"?`<div class="items">${items}</div>`:""}${o.Nota?`<div class="nota">📝 ${esc(o.Nota)}</div>`:""}${extra}${precio}
+    ${o.Tipo=="pedido"?`<div class="items">${items}</div>`:""}${nota?`<div class="nota">📝 ${esc(nota)}</div>`:""}${extra}${precio}
     <div class="est">Estado: ${esc(o.Estado)}</div><div class="bts">${botones}</div></div>`;
 }
 
 function filtrar(ps){
   if(ROL=="caja") return ps.filter(o=>(o.Tipo=="pedido")||o.Tipo=="cuenta");
   if(ROL=="cocina") return ps.filter(o=>o.Tipo=="pedido"&&o.Estado=="en cocina");
-  return ps.filter(o=>(o.Tipo=="pedido"&&o.Estado=="listo")||o.Tipo=="mesonero"||o.Tipo=="cuenta");
+  if(ROL=="repartidor") return ps.filter(o=>o.Tipo=="pedido"&&o.Estado=="listo"&&!o.Mesa);
+  return ps.filter(o=>o.Mesa&&((o.Tipo=="pedido"&&o.Estado=="listo")||o.Tipo=="mesonero"||o.Tipo=="cuenta"));
 }
 function importante(o){
   if(ROL=="caja") return (o.Tipo=="pedido"&&o.Estado=="nuevo")||o.Tipo=="cuenta";
   if(ROL=="cocina") return o.Estado=="en cocina";
+  if(ROL=="repartidor") return o.Estado=="listo";
   return o.Estado=="listo"||o.Tipo=="mesonero"||o.Tipo=="cuenta";
 }
 
@@ -71,12 +83,12 @@ function cambiar(b){
 
 function pedirPin(msg){
   $("login").style.display="flex"; $("login-msg").textContent=msg||"";
-  $("mesero-nombre").style.display = ROL=="mesero" ? "block" : "none";
+  $("mesero-nombre").style.display = CON_NOMBRE ? "block" : "none";
   $("mesero-nombre").value = MESERO;
 }
 $("entrar").onclick=()=>{
   const p=$("pin").value.trim(); if(!p) return;
-  if(ROL=="mesero"){ const n=$("mesero-nombre").value.trim(); if(!n){ $("login-msg").textContent="Escribe tu nombre"; return; } MESERO=n; localStorage.setItem("mesero_nombre",n); }
+  if(CON_NOMBRE){ const n=$("mesero-nombre").value.trim(); if(!n){ $("login-msg").textContent="Escribe tu nombre"; return; } MESERO=n; localStorage.setItem(CLAVE_NOMBRE,n); }
   PIN=p; localStorage.setItem("pin_"+ROL,p); $("login").style.display="none"; sonar(); vistos=null; cargar();
 };
 $("salir").onclick=()=>{ localStorage.removeItem("pin_"+ROL); PIN=""; pedirPin(); };
@@ -87,7 +99,7 @@ if($("cerrar")) $("cerrar").onclick=()=>{
 $("activar").onclick=()=>{ $("activar").closest(".capa").style.display="none"; sonar(); if(!PIN) pedirPin(); else cargar(); };
 
 document.title = NOMBRES[ROL]+" · Pedidos";
-$("rol").textContent = NOMBRES[ROL] + (ROL=="mesero"&&MESERO?" · "+MESERO:"");
+$("rol").textContent = NOMBRES[ROL] + (CON_NOMBRE&&MESERO?" · "+MESERO:"");
 fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=Config&t=${Date.now()}`).then(r=>r.text()).then(t=>{
   for(const r of parseCSV(t.trim()).slice(1)) if((r[0]||"").trim().toLowerCase()=="url del sistema") API=(r[1]||"").trim();
   if(!/^https:\/\/script\.google\.com\//.test(API)){ $("estado").textContent="⚠️ Falta la «URL del sistema» en la pestaña Config de la hoja."; return; }
