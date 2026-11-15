@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sistema de pedidos para tu negocio · David Narváez</title>
+<meta name="description" content="Pedidos por QR de mesa, delivery con GPS y kiosco en una sola caja. Por David Narváez.">
+<meta property="og:title" content="Todos tus pedidos en una sola caja"><meta property="og:image" content="hero.jpg">
+<style>
+:root{--g:#f5c542;--g2:#d4a017;--bg:#0b0b0d;--c:#16161a;--t:#f3f0e8;--m:#a9a39a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.4}
+a{color:inherit}.w{max-width:1000px;margin:auto;padding:0 18px}
+h2{font-size:1.6rem;text-align:center;margin:0 0 22px}h2 b{color:var(--g)}section{padding:46px 0}
+.hero{position:relative;min-height:78vh;display:flex;align-items:flex-end;background:url(hero.jpg) center/cover}
+.hero:before{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#0b0b0d 8%,rgba(11,11,13,.35))}
+.hero .w{position:relative;padding-bottom:34px}.hero h1{font-size:clamp(2rem,7vw,3.4rem);margin:0 0 10px;line-height:1.05}.hero h1 b{color:var(--g)}
+.hero p{color:#ddd;max-width:560px}.by{color:var(--g);letter-spacing:.12em;font-size:.8rem;text-transform:uppercase}.ia{font-size:.7rem;color:#999;margin-top:14px}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:16px 24px;border-radius:14px;font-weight:800;text-decoration:none;color:#1a1200;background:linear-gradient(135deg,#ffe58a,var(--g) 45%,var(--g2));box-shadow:0 0 0 0 rgba(245,197,66,.6);animation:pulse 2s infinite;position:relative;overflow:hidden}
+.btn:after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);transform:skewX(-20deg);animation:shine 2.6s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 16px rgba(245,197,66,0)}100%{box-shadow:0 0 0 0 rgba(245,197,66,0)}}@keyframes shine{60%,100%{left:130%}}
+.demo{background:linear-gradient(180deg,#1a1508,#0b0b0d);border-top:2px solid var(--g);border-bottom:2px solid var(--g)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.demo .btn{justify-content:center;flex-direction:column;font-size:1.1rem;padding:22px 12px}.demo .btn i{font-style:normal;font-size:2rem}.demo .btn small{font-size:.75rem;letter-spacing:.1em}
+.map{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center}
+.col{display:flex;flex-direction:column;gap:12px}.node{background:var(--c);border:1px solid #333;border-radius:14px;padding:12px 14px;display:flex;gap:10px;align-items:center;font-weight:600}
+.node i{font-style:normal;font-size:1.5rem}.in .node{border-left:4px solid #4fc3f7}.out .node{border-left:4px solid #81c784}
+.core{width:150px;height:150px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(#ffe58a,var(--g2));color:#1a1200;font-weight:900;font-size:1.2rem;box-shadow:0 0 40px rgba(245,197,66,.5);margin:auto}
+.core i{font-style:normal;font-size:2.4rem}.arr{color:var(--g);font-size:1.6rem;text-align:center}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;counter-reset:s}
+.st{background:var(--c);border-radius:14px;padding:16px;text-align:center;position:relative}.st i{font-style:normal;font-size:2rem;display:block}
+.st:before{counter-increment:s;content:counter(s);position:absolute;top:-10px;left:-6px;background:var(--g);color:#000;width:26px;height:26px;border-radius:50%;font-weight:900;display:flex;align-items:center;justify-content:center}
+.ic{background:var(--c);border-radius:14px;padding:14px;display:flex;gap:10px;align-items:center}.ic i{font-style:normal;font-size:1.6rem}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.plan{background:var(--c);border:1px solid #333;border-radius:18px;padding:22px}
+.plan.top{border:2px solid var(--g)}.tag{background:var(--g);color:#000;font-size:.7rem;font-weight:800;padding:3px 8px;border-radius:20px}
+.price{font-size:2.2rem;font-weight:900;color:var(--g)}.plan ul{padding-left:18px;color:#ccc}
+.note{text-align:center;color:var(--m);margin-top:16px}details{background:var(--c);border-radius:12px;padding:12px 14px;margin-bottom:10px}summary{font-weight:700;cursor:pointer}
+footer{text-align:center;color:#777;padding:30px 0;font-size:.85rem}
+@media(max-width:700px){.map{grid-template-columns:1fr}.arr.r{transform:rotate(90deg)}}
+@media(prefers-reduced-motion:reduce){.btn,.btn:after{animation:none}}
+</style></head><body>
+<header class="hero"><div class="w">
+<div class="by">Por David Narváez</div>
+<h1>Todos tus pedidos en <b>una sola caja</b></h1>
+<p>Mesa, delivery o kiosco: tú lo ves en la caja, la cocina lo prepara y la pantalla llama el número.</p>
+<a class="btn" href="#demo">▶ Probar la demo</a>
+<div class="ia">Imagen ilustrativa generada con IA</div></div></header>
+
+<section class="demo" id="demo"><div class="w"><h2>Prueba la demo <b>en vivo</b></h2>
+<div class="grid">
+<a class="btn" href="https://siganprobando.github.io/dunig7/catalogo/" target="_blank"><i>📱</i><small>▶ PROBAR</small>Catálogo</a>
+<a class="btn" href="https://siganprobando.github.io/dunig7/catalogo/kiosco.html" target="_blank"><i>🖥️</i><small>▶ PROBAR</small>Kiosco</a>
+<a class="btn" href="https://siganprobando.github.io/dunig7/catalogo/sistema/caja.html" target="_blank"><i>💵</i><small>▶ PROBAR</small>Caja</a>
+<a class="btn" href="https://siganprobando.github.io/dunig7/catalogo/sistema/pantalla.html" target="_blank"><i>📺</i><small>▶ PROBAR</small>Pantalla de números</a>
+</div><p class="note">Demo de una dulcería de ejemplo · Usas tus propios equipos: teléfono, tablet, PC o TV.</p></div></section>
+
+<section><div class="w"><h2>Cómo <b>funciona</b></h2>
+<div class="map">
+<div class="col in"><div class="node"><i>🔳</i>QR de mesa</div><div class="node"><i>🛵</i>Delivery con GPS</div><div class="node"><i>🖥️</i>Kiosco</div></div>
+<div><div class="arr r">➜</div><div class="core"><i>💵</i>Tu caja</div><div class="arr r">➜</div></div>
+<div class="col out"><div class="node"><i>👨‍🍳</i>Cocina</div><div class="node"><i>📺</i>Números en TV</div><div class="node"><i>🧑‍💼</i>Mesero</div><div class="node"><i>🛵</i>Repartidor</div><div class="node"><i>📄</i>Reporte PDF</div></div>
+</div></div></section>
+
+<section><div class="w"><h2>Todo <b>incluido</b></h2><div class="grid">
+<div class="ic"><i>✨</i>Catálogo negro y dorado</div><div class="ic"><i>🔳</i>QR por mesa</div><div class="ic"><i>🔔</i>Llamar mesero y pedir cuenta</div>
+<div class="ic"><i>📍</i>Delivery con ubicación</div><div class="ic"><i>🖥️</i>Kiosco autoservicio</div><div class="ic"><i>🔒</i>Pantallas con clave</div>
+<div class="ic"><i>🧾</i>Ticket de venta</div><div class="ic"><i>📧</i>Reporte diario al correo</div><div class="ic"><i>✏️</i>Cambias precios en tu hoja de Google</div>
+</div></div></section>
+
+<section><div class="w"><h2><b>Planes</b></h2><div class="plans">
+<div class="plan top"><span class="tag">Recomendado</span><h3>Plan Completo</h3><div class="price">$120</div><div>instalación + <b>$20 al mes</b></div>
+<ul><li>Todo el sistema instalado</li><li>Entrenamiento por videollamada</li><li>Soporte y cambios cada mes</li></ul></div>
+<div class="plan"><h3>Plantilla</h3><div class="price">$35</div><div>pago único</div><ul><li>Lo instalas tú con guía paso a paso</li><li>Sin soporte mensual</li></ul></div>
+</div></div></section>
+
+<section><div class="w"><h2>Cómo <b>empezamos</b></h2><div class="steps">
+<div class="st"><i>👀</i>Ves la demo</div><div class="st"><i>💳</i>Pagas la mitad</div><div class="st"><i>📝</i>Envías logo y productos</div><div class="st"><i>⚙️</i>Instalo tu sistema y QR</div><div class="st"><i>🎓</i>Te entreno y pagas el resto</div>
+</div><p class="note">Todo a distancia · Pago móvil, transferencia, Zelle o PayPal</p></div></section>
+
+<section><div class="w"><h2>Preguntas <b>frecuentes</b></h2>
+<details><summary>¿Necesito internet?</summary>Sí, en los equipos del local.</details>
+<details><summary>¿Puedo cambiar precios yo mismo?</summary>Sí, desde tu hoja de Google; el resto queda protegido.</details>
+<details><summary>¿Sirve como factura fiscal?</summary>No, el ticket es un comprobante interno.</details>
+<details><summary>¿Y si no pago la mensualidad?</summary>Se pausan el soporte y los cambios.</details>
+</div></section>
+
+<section id="contacto" style="text-align:center"><div class="w"><h2>¿Lo quieres en tu <b>negocio</b>?</h2>
+<p>Escríbeme y te muestro el sistema funcionando.</p>
+<a class="btn" href="https://wa.me/584221494236?text=Hola%20David%2C%20quiero%20una%20demo%20del%20sistema%20de%20pedidos" target="_blank">💬 Quiero una demo por WhatsApp</a>
+</div></section>
+<footer>© 2026 David Narváez</footer>
+</body></html>
