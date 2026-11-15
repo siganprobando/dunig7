@@ -104,8 +104,8 @@ function porMesa(ps){                       // caja: un cuadro por mesa; al toca
     const nuevos=l.filter(importante).length, abierta=k==ABIERTA;
     return `<button class="mesa-cuadro ${nuevos?"mesa-alerta":""} ${abierta?"mesa-abierta":""}" data-mesa="${esc(k)}">
       <span class="mc-nom">${esc(k)}</span>
-      <span class="mc-est">${nuevos?`🔴 ${nuevos} nuevo${nuevos>1?"s":""}`:"✓ Al día"}</span>
-      <span class="mc-det">${l.length} pedido${l.length>1?"s":""} · ${fmt(tot)}</span></button>`;
+      <span class="mc-est">${nuevos?`🔴 ${nuevos} ${ROL=="cocina"?"por preparar":"nuevo"+(nuevos>1?"s":"")}`:"✓ Al día"}</span>
+      <span class="mc-det">${l.length} ${ROL=="mesero"?(l.length>1?"avisos":"aviso"):(l.length>1?"pedidos":"pedido")}${ROL=="caja"?" · "+fmt(tot):""}</span></button>`;
   }).join("");
   const det = ABIERTA ? `<section class="mesa-detalle"><div class="md-top"><b>${esc(ABIERTA)}</b><button class="md-cerrar" data-mesa="${esc(ABIERTA)}">✕ Cerrar</button></div>
       <div style="display:grid;gap:10px">${g[ABIERTA].map(tarjeta).join("")}</div></section>` : `<p class="vacio" style="grid-column:1/-1;margin:4px 0">Toca una mesa para ver sus pedidos.</p>`;
@@ -142,9 +142,9 @@ function cargar(){
     if(vistos && claves.some(k=>!vistos.has(k))) sonar();
     vistos = new Set(claves);
     const escribiendo = document.activeElement && document.activeElement.tagName=="TEXTAREA";
-    if(!escribiendo) $("lista").innerHTML = ps.length ? (ROL=="caja" ? porMesa(ps.reverse()) : ps.reverse().map(tarjeta).join("")) : `<p class="vacio">Sin pedidos por ahora. Esta pantalla se actualiza sola.</p>`;
+    if(!escribiendo) $("lista").innerHTML = ps.length ? (ROL!="repartidor" ? porMesa(ps.reverse()) : ps.reverse().map(tarjeta).join("")) : `<p class="vacio">Sin pedidos por ahora. Esta pantalla se actualiza sola.</p>`;
     $("lista").querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>cambiar(b));
-    if(ROL=="caja") activarMesas();
+    if(ROL!="repartidor") activarMesas();
     if(ROL=="caja") $("ventas").textContent = "Hoy: "+r.pedidosHoy+" pedidos · $"+Number(r.ventasHoy).toFixed(2)+"  |  Semana: $"+Number(r.ventasSemana).toFixed(2);
   }).catch(()=>{$("estado").textContent="🔴 Sin conexión, reintentando…"}).finally(()=>{ocupado=false});
 }
