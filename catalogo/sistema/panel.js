@@ -43,7 +43,12 @@ function tarjeta(o){
   const verDatos = (ROL=="caja"||ROL=="repartidor") && !o.Mesa;
   let extra = "";
   if(verDatos && o.Telefono) extra += `<div class="sub">📞 <a href="tel:${esc(o.Telefono)}">${esc(o.Telefono)}</a></div>`;
-  if(verDatos && dir) extra += `<div class="dir">📍 ${esc(dir)}${ROL=="repartidor"?` · <a target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(dir)}">Ver mapa</a>`:""}</div>`;
+  if(verDatos && dir){
+    const g = dir.match(/^(-?\d+\.\d+),\s*(-?\d+\.\d+)\s*(?:\(Ref:\s*([\s\S]*)\))?$/);
+    const destino = g ? g[1]+","+g[2] : dir;
+    const texto = g ? "Ubicación GPS del cliente"+(g[3]?" · Ref: "+esc(g[3]):"") : esc(dir);
+    extra += `<div class="dir">📍 ${texto}${ROL=="repartidor"?`<br><a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destino)}">🧭 Cómo llegar</a>`:""}</div>`;
+  }
   return `<div class="card ${clase}"><div class="top"><b>${titulo}</b><span>${esc(o.Hora)} · ${mins(o.Hora)}</span></div>
     ${o.Tipo=="pedido"?`<div class="items">${items}</div>`:""}${nota?`<div class="nota">📝 ${esc(nota)}</div>`:""}${extra}${precio}
     <div class="est">Estado: ${esc(o.Estado)}</div><div class="bts">${botones}</div></div>`;

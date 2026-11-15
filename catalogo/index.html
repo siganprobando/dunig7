@@ -106,7 +106,7 @@ footer small{display:block;margin-top:6px;font-size:.75rem}
   <div id="carro-items"></div>
   <textarea id="nota" placeholder="Nota (ej: sin azúcar, para llevar…)"></textarea>
   <div class="tot" id="carro-tot"></div>
-  <div id="datos" style="display:none"><input id="cli-nombre" placeholder="Tu nombre" class="campo"><input id="cli-tel" placeholder="Tu teléfono" inputmode="tel" class="campo"><input id="cli-dir" placeholder="Dirección de entrega" class="campo"></div>
+  <div id="datos" style="display:none"><input id="cli-nombre" placeholder="Tu nombre" class="campo"><input id="cli-tel" placeholder="Tu teléfono" inputmode="tel" class="campo"><button type="button" class="btn sec" id="gps-btn">📍 Marcar mi ubicación (GPS)</button><div id="gps-ok" style="margin:6px 0 8px;font-size:.9rem"></div><input id="cli-ref" placeholder="Referencia opcional (ej: casa azul, piso 2)" class="campo"></div>
   <button class="btn" id="enviar">✅ Enviar pedido</button>
   <div id="seguimiento" style="display:none"></div>
   <button class="btn sec" id="cuenta" style="display:none">🧾 Pedir la cuenta</button>
@@ -180,15 +180,28 @@ $("enviar").onclick=()=>{
   const {ks,tot}=ultimo; if(!ks.length) return;
   const nota=$("nota").value.trim(), q={tipo:"pedido",mesa:MESA,pedido:ks.map(k=>carro[k]+" x "+k).join("\n"),total:tot.toFixed(2),nota};
   if(!MESA){
-    q.cliente=$("cli-nombre").value.trim(); q.tel=$("cli-tel").value.trim(); const dir=$("cli-dir").value.trim();
-    if(!q.cliente||!q.tel||!dir){ aviso("Escribe tu nombre, teléfono y dirección"); return; }
-    q.nota=("Dirección: "+dir+(nota?" · "+nota:"")).slice(0,200);
+    q.cliente=$("cli-nombre").value.trim(); q.tel=$("cli-tel").value.trim();
+    if(!q.cliente||!q.tel){ aviso("Escribe tu nombre y teléfono"); return; }
+    if(!GPS){ aviso("Toca «Marcar mi ubicación» para saber dónde entregar"); return; }
+    const ref=$("cli-ref").value.trim().replace(/·/g,"-");
+    q.nota=("Dirección: "+GPS+(ref?" (Ref: "+ref+")":"")+(nota?" · "+nota:"")).slice(0,200);
   }
   $("enviar").disabled=true; $("enviar").textContent="Enviando…";
   enviarSistema(q).then(r=>{
     carro={}; $("nota").value=""; $("seguimiento").style.display="block"; pintarCarro(); $("enviar").textContent="✅ Enviar pedido"; aviso("✅ Pedido enviado");
     clearInterval(seguir); verEstado(r.id); seguir=setInterval(()=>verEstado(r.id),6000);
   }).catch(e=>{ $("enviar").disabled=false; $("enviar").textContent="✅ Enviar pedido"; aviso("⚠️ "+e.message); });
+};
+let GPS="";
+$("gps-btn").onclick=()=>{
+  if(!navigator.geolocation){ aviso("Tu teléfono no permite ubicación"); return; }
+  $("gps-ok").textContent="Buscando tu ubicación…";
+  navigator.geolocation.getCurrentPosition(p=>{
+    GPS=p.coords.latitude.toFixed(6)+","+p.coords.longitude.toFixed(6);
+    $("gps-ok").innerHTML="✅ Ubicación marcada (precisión ±"+Math.round(p.coords.accuracy)+" m)";
+    $("gps-btn").textContent="📍 Volver a marcar";
+  },e=>{ GPS=""; $("gps-ok").textContent= e.code==1 ? "⚠️ Permite la ubicación en tu navegador y toca de nuevo" : "⚠️ No se pudo leer el GPS. Activa la ubicación y toca de nuevo"; },
+  {enableHighAccuracy:true,timeout:20000,maximumAge:0});
 };
 $("carro-bar").onclick=()=>{pintarCarro();$("carro").classList.add("open")};
 $("carro-x").onclick=()=>$("carro").classList.remove("open");
