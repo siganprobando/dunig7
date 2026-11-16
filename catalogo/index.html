@@ -91,6 +91,10 @@ footer small{display:block;margin-top:6px;font-size:.75rem}
 .mesa-tag{background:var(--dorado)!important;font-weight:700}
 .bs{font-size:.9rem;font-weight:700;color:#7a5a12;margin:-2px 0 8px}
 .bs-tot{display:block;font-size:.85rem;font-weight:600;opacity:.8;margin-top:2px}
+#tasa-bar{position:sticky;top:0;z-index:55;display:flex;align-items:center;justify-content:center;gap:8px;padding:7px 10px;background:#111;color:#f5d36b;font-size:.88rem;font-weight:700;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#tasa-bar small{color:#bbb;font-weight:500}
+.tb-dot{width:8px;height:8px;border-radius:50%;background:#2ecc71;box-shadow:0 0 0 0 rgba(46,204,113,.7);animation:tbPulso 1.8s infinite}
+@keyframes tbPulso{0%{box-shadow:0 0 0 0 rgba(46,204,113,.7)}70%{box-shadow:0 0 0 8px rgba(46,204,113,0)}100%{box-shadow:0 0 0 0 rgba(46,204,113,0)}}
 </style>
 <link rel="preconnect" href="https://fonts.gstatic.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>/* ===== Estilo moderno, fondo blanco ===== */
@@ -222,6 +226,7 @@ footer{color:#7c7c88}
 </style>
 </head>
 <body>
+<div id="tasa-bar" style="display:none"><span class="tb-dot"></span><span id="tasa-txt"></span></div>
 <header class="hero"><div class="hero-in">
   <span class="tag" id="tag">🚚 Delivery en Mérida y Ejido</span>
   <h1>Dulcería Los Andes</h1>
@@ -281,7 +286,12 @@ let TASA=0,TASA_FIJA=0,TASA_FECHA="";
 try{const c=JSON.parse(localStorage.getItem("cat_tasa_bcv")||"null");if(c&&c.v){TASA=c.v;TASA_FECHA=c.f||""}}catch(e){}
 const bsDe=usd=>{const t=TASA_FIJA||TASA;return t?"Bs "+(Number(usd)*t).toLocaleString("es-VE",{minimumFractionDigits:2,maximumFractionDigits:2}):""};
 const tasaTxt=()=>{const t=TASA_FIJA||TASA;return t?(TASA_FIJA?"Tasa del negocio":"Tasa BCV")+": Bs "+t.toLocaleString("es-VE",{minimumFractionDigits:2,maximumFractionDigits:2})+" por $":""};
-fetch("https://ve.dolarapi.com/v1/dolares/oficial").then(r=>r.json()).then(d=>{if(d&&d.promedio){TASA=Number(d.promedio);TASA_FECHA=d.fechaActualizacion||"";try{localStorage.setItem("cat_tasa_bcv",JSON.stringify({v:TASA,f:TASA_FECHA}))}catch(e){}if(productos.length)pintar();pintarCarro();}}).catch(()=>{});
+function pintarTasa(){const t=TASA_FIJA||TASA,b=document.getElementById("tasa-bar");if(!b||!t)return;
+  let f="";if(!TASA_FIJA&&TASA_FECHA){const d=new Date(TASA_FECHA);if(!isNaN(d))f=d.toLocaleDateString("es-VE",{day:"numeric",month:"short"});}
+  document.getElementById("tasa-txt").innerHTML=(TASA_FIJA?"💵 Tasa del negocio: ":"💵 Tasa BCV hoy: ")+"Bs "+t.toLocaleString("es-VE",{minimumFractionDigits:2,maximumFractionDigits:2})+(f?` <small>· ${f}</small>`:"")+` <small>· actualizada ${new Date().toLocaleTimeString("es-VE",{hour:"2-digit",minute:"2-digit"})}</small>`;
+  b.style.display="flex";}
+function cargarTasa(){return fetch("https://ve.dolarapi.com/v1/dolares/oficial?t="+Date.now()).then(r=>r.json()).then(d=>{if(d&&d.promedio){TASA=Number(d.promedio);TASA_FECHA=d.fechaActualizacion||"";try{localStorage.setItem("cat_tasa_bcv",JSON.stringify({v:TASA,f:TASA_FECHA}))}catch(e){}if(productos.length)pintar();pintarCarro();}}).catch(()=>{}).then(pintarTasa);}
+cargarTasa(); setInterval(cargarTasa,10*60*1000);
 // =========================================================================
 const MESA = (new URLSearchParams(location.search).get("mesa")||"").replace(/[^\w -]/g,"").slice(0,12);
 const KIOSCO = new URLSearchParams(location.search).get("kiosco")=="1" && !MESA;   // autoservicio: paga en caja con su número y retira en el mostrador
@@ -547,6 +557,7 @@ gv("Config").then(t=>{
     if((r[0]||"").trim().toLowerCase()=="url del sistema"){ const v=(r[1]||"").trim(); if(/^https:\/\/script\.google\.com\//.test(v)) API=v; }
   }
 }).catch(()=>{}).then(()=>{
+  pintarTasa();
   topLinks();
   return gv("Productos");
 }).then(t=>{
