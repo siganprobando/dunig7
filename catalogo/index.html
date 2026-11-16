@@ -89,6 +89,8 @@ footer small{display:block;margin-top:6px;font-size:.75rem}
 @media (prefers-reduced-motion:reduce){.sg-paso.ahora,.sg-paso.ahora .pt,.sg-vivo:before{animation:none}}
 #aviso{position:fixed;left:50%;top:16px;transform:translateX(-50%);background:var(--cafe);color:#fff;padding:12px 18px;border-radius:24px;z-index:70;display:none;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.3)}
 .mesa-tag{background:var(--dorado)!important;font-weight:700}
+.bs{font-size:.9rem;font-weight:700;color:#7a5a12;margin:-2px 0 8px}
+.bs-tot{display:block;font-size:.85rem;font-weight:600;opacity:.8;margin-top:2px}
 </style>
 <link rel="preconnect" href="https://fonts.gstatic.com"><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>/* ===== Estilo moderno, fondo blanco ===== */
@@ -274,6 +276,12 @@ footer{color:#7c7c88}
 // ===== CONFIGURACIÓN: solo cambia estas dos líneas para otro negocio =====
 const SHEET_ID = "1SkaZA4m6t6Ti7DRR4B7VbWyf49taEUTc_TKh-xkxX4Y";
 let API = ""; // "URL del sistema" en la pestaña Config de la hoja
+// ===== Bolívares con la tasa del día (BCV vía DolarApi; o "Tasa" fija en la pestaña Config) =====
+let TASA=0,TASA_FIJA=0,TASA_FECHA="";
+try{const c=JSON.parse(localStorage.getItem("cat_tasa_bcv")||"null");if(c&&c.v){TASA=c.v;TASA_FECHA=c.f||""}}catch(e){}
+const bsDe=usd=>{const t=TASA_FIJA||TASA;return t?"Bs "+(Number(usd)*t).toLocaleString("es-VE",{minimumFractionDigits:2,maximumFractionDigits:2}):""};
+const tasaTxt=()=>{const t=TASA_FIJA||TASA;return t?(TASA_FIJA?"Tasa del negocio":"Tasa BCV")+": Bs "+t.toLocaleString("es-VE",{minimumFractionDigits:2,maximumFractionDigits:2})+" por $":""};
+fetch("https://ve.dolarapi.com/v1/dolares/oficial").then(r=>r.json()).then(d=>{if(d&&d.promedio){TASA=Number(d.promedio);TASA_FECHA=d.fechaActualizacion||"";try{localStorage.setItem("cat_tasa_bcv",JSON.stringify({v:TASA,f:TASA_FECHA}))}catch(e){}if(productos.length)pintar();pintarCarro();}}).catch(()=>{});
 // =========================================================================
 const MESA = (new URLSearchParams(location.search).get("mesa")||"").replace(/[^\w -]/g,"").slice(0,12);
 const KIOSCO = new URLSearchParams(location.search).get("kiosco")=="1" && !MESA;   // autoservicio: paga en caja con su número y retira en el mostrador
@@ -384,7 +392,7 @@ function pintarCarro(){
   bar.textContent=cant?"🛒 Ver pedido · "+cant+(cant==1?" producto":" productos")+" · $"+tot.toFixed(2).replace(/\.00$/,""):"📋 Ver mi pedido"+(MESA?" y solicitar al mesero":"");
   $("carro-items").innerHTML=ks.length?ks.map(k=>`<div class="it"><span>${esc(k)}</span><button data-k="${esc(k)}" data-d="-1">−</button><b>${carro[k]}</b><button data-k="${esc(k)}" data-d="1">+</button></div>`).join(""):"<p>Tu pedido está vacío.</p>";
   $("carro-items").querySelectorAll("button").forEach(b=>b.onclick=()=>{carro[b.dataset.k]=Math.max(0,(carro[b.dataset.k]||0)+ +b.dataset.d);pintarCarro()});
-  $("carro-tot").textContent="Total: $"+tot.toFixed(2).replace(/\.00$/,"");
+  $("carro-tot").innerHTML="Total: $"+tot.toFixed(2).replace(/\.00$/,"")+(bsDe(tot)?`<small class="bs-tot">≈ ${bsDe(tot)}<br>${tasaTxt()}</small>`:"");
   ultimo={ks,tot};
   $("enviar").disabled=!ks.length;
   const vacio=!ks.length;
@@ -413,7 +421,7 @@ function pintarSeguimiento(estado){
    <div>Paso ${i+1} de ${PASOS.length}${fin?"":" · <span class='sg-vivo'>se actualiza solo</span>"}</div>
    <div class="sg-bar"><i style="width:${pct}%"></i></div>`+
    PASOS.map((p,j)=>`<div class="sg-paso ${j<i||fin?"hecho":j==i?"ahora":""}"><span class="pt">${j<i||fin?"✓":""}</span><div><b>${p[1]}</b>${j==i?"<small>"+p[2]+"</small>":""}</div></div>`).join("")+
-   `<div class="sg-info"><b>Pediste:</b><br>${SG.items.map(esc).join("<br>")}<br><b>Total: $${SG.total}</b><br><small>Enviado ${hace(SG.t)}${SG.ult?" · revisado "+new Date(SG.ult).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}):""}</small></div>`+
+   `<div class="sg-info"><b>Pediste:</b><br>${SG.items.map(esc).join("<br>")}<br><b>Total: $${SG.total}</b>${bsDe(SG.total)?` <small>(≈ ${bsDe(SG.total)})</small>`:""}<br><small>Enviado ${hace(SG.t)}${SG.ult?" · revisado "+new Date(SG.ult).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}):""}</small></div>`+
    (fin?"":`<div class="sg-info">💡 No cierres esta página: aquí verás cada cambio. ${MESA?"Si necesitas algo, llama al mesero.":"Si cambias de lugar, avísale al negocio."}</div>`);
 }
 function verEstado(id){
@@ -454,7 +462,7 @@ function enviarKiosco(q,ks){
     carro={}; $("nota").value=""; pintarCarro(); $("enviar").textContent="✅ Enviar pedido"; $("carro").classList.remove("open");
     const v=document.createElement("div"); v.id="kio-num";
     v.innerHTML=`<div class="kio-caja"><div class="kio-t">Tu número de orden</div><div class="kio-n">${esc(String(r.num||"—"))}</div>
-      <div class="kio-items">${q.pedido.split("\n").map(esc).join("<br>")}</div><div class="kio-tot">Total: $${esc(q.total.replace(/\.00$/,""))}</div>
+      <div class="kio-items">${q.pedido.split("\n").map(esc).join("<br>")}</div><div class="kio-tot">Total: $${esc(q.total.replace(/\.00$/,""))}${bsDe(q.total)?`<br><small>≈ ${bsDe(q.total)}</small>`:""}</div>
       <ol class="kio-pasos"><li>Paga en <b>caja</b> diciendo tu número.</li><li>Retira tu pedido en el <b>mostrador</b> cuando tu número aparezca en <b>«Listo»</b>.</li></ol>
       <button class="btn" id="kio-ok">👍 Entendido · nuevo pedido</button><div class="kio-seg" id="kio-seg"></div></div>`;
     document.body.appendChild(v); timbre();
@@ -523,7 +531,7 @@ function pintar(){
     <div class="card ${p.ok?"":"agotado"}">
       <img src="${esc(p.foto)}" alt="${esc(p.nombre)}" loading="lazy">
       <div class="b"><h3>${esc(p.nombre)}</h3><p>${esc(p.desc)}</p>
-      <div class="price">$${esc(p.precio)}</div>
+      <div class="price">$${esc(p.precio)}</div>${bsDe(n(p.precio))?`<div class="bs">≈ ${bsDe(n(p.precio))}</div>`:""}
       <button class="btn" data-add="${esc(p.nombre)}">${p.ok?"➕ Agregar":"Agotado"}</button></div>
     </div>`).join("");
   const cats=["Todos",...new Set(productos.map(p=>p.cat).filter(Boolean))];
@@ -535,6 +543,7 @@ function pintar(){
 const gv = hoja => fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=${hoja}&t=${Date.now()}`).then(r=>r.text());
 gv("Config").then(t=>{
   for(const r of parseCSV(t.trim()).slice(1)){
+    if((r[0]||"").trim().toLowerCase()=="tasa"){ const v=parseFloat(String(r[1]||"").replace(",",".")); if(v>0) TASA_FIJA=v; }
     if((r[0]||"").trim().toLowerCase()=="url del sistema"){ const v=(r[1]||"").trim(); if(/^https:\/\/script\.google\.com\//.test(v)) API=v; }
   }
 }).catch(()=>{}).then(()=>{
