@@ -347,7 +347,7 @@ function cargar(){
     $("lista").querySelectorAll("button[data-id]").forEach(b=>b.onclick=()=>cambiar(b));
     if(ROL!="repartidor") activarMesas();
     activarCierre();
-    if(ROL=="caja") $("ventas").textContent = "Hoy: "+r.pedidosHoy+" pedidos · $"+Number(r.ventasHoy).toFixed(2)+"  |  Semana: $"+Number(r.ventasSemana).toFixed(2);
+    if(ROL=="caja") $("ventas").textContent = "Hoy: "+r.pedidosHoy+" pedidos · $"+Number(r.ventasHoy).toFixed(2);
   }).catch(()=>{$("estado").textContent="🔴 Sin conexión, reintentando…"}).finally(()=>{ocupado=false});
 }
 function cambiar(b){
@@ -368,9 +368,18 @@ $("entrar").onclick=()=>{
 };
 $("salir").onclick=()=>{ localStorage.removeItem("pin_"+ROL); PIN=""; pedirPin(); };
 if($("tickets")) $("tickets").onclick=()=>verTickets();
-if($("cerrar")) $("cerrar").onclick=()=>{
-  if(!confirm("¿Cerrar la semana? Se guarda el total en «Ventas semanales», los pedidos pasan a «Historial» y la bandeja queda limpia.")) return;
-  api({accion:"cerrar",pin:PIN}).then(r=>{ alert(r.ok?"Semana cerrada: "+r.pedidos+" pedidos, $"+Number(r.total).toFixed(2):r.error); cargar(); });
+if($("cerrar-caja")) $("cerrar-caja").onclick=()=>{
+  const p=$("pin").value.trim()||PIN; if(!p){ $("login-msg").textContent="Escribe el PIN para cerrar la caja"; return; }
+  if(!API){ $("login-msg").textContent="Sin conexión con el sistema"; return; }
+  if(!confirm("¿Cerrar la caja?")) return;
+  api({accion:"lista",rol:ROL,pin:p}).then(r=>{
+    if(!r.ok){ $("login-msg").textContent = r.error=="PIN" ? "PIN incorrecto" : r.error; return; }
+    localStorage.removeItem("pin_"+ROL); PIN=""; $("pin").value="";
+    $("ventas").textContent=""; $("lista").innerHTML='<div class="vacio">Caja cerrada.</div>';
+    $("login-msg").style.color="#1e8449";
+    $("login-msg").textContent="Caja cerrada · Hoy: "+r.pedidosHoy+" pedidos · $"+Number(r.ventasHoy).toFixed(2);
+    setTimeout(()=>{ $("login-msg").style.color=""; },8000);
+  }).catch(()=>{ $("login-msg").textContent="Sin conexión"; });
 };
 $("activar").onclick=()=>{ $("activar").closest(".capa").style.display="none"; sonar(); iniciarGPS(); if(!PIN) pedirPin(); else cargar(); };
 
