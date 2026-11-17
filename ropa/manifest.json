@@ -1,0 +1,1 @@
+{"name": "Tu Tienda (demo)", "short_name": "Tu Tienda", "start_url": "./", "display": "standalone", "background_color": "#0b0906", "theme_color": "#0b0906", "lang": "es-VE", "icons": [{"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"}, {"src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}], "scope": "./", "id": "./"}
