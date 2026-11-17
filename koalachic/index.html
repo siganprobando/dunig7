@@ -138,7 +138,7 @@ img{display:block}
   </select>
 </div>
 <main class="grid" id="grid"><div class="skel"></div><div class="skel"></div></main>
-<p class="foot">Catálogo en línea · Demo</p>
+<p class="foot">Catálogo en línea</p>
 
 <div class="ov" id="ov"></div>
 <section class="sheet" id="sheet" role="dialog" aria-modal="true">
@@ -160,7 +160,7 @@ img{display:block}
 <script>
 (async function(){
   const N = Nucleo, $ = N.$, esc = N.esc;
-  N.bannerDemo();
+  if (!(window.APP_CONFIG || {}).sheetId) N.bannerDemo();
   let db, S = {}, CATS = [], SETS = [], products = [];
   const money = n => N.money0(n, S.moneda || "$");
   const st = { cat: "todo", size: null, q: "", sort: "new", pick: null, psize: null, qty: 1, foto: 0 };
@@ -176,6 +176,25 @@ img{display:block}
     ]);
     S = (a[0] && a[0].datos) || {}; SETS = t; CATS = c;
     products = p.map(x => ({ ...x, precio: Number(x.precio), tallas: Array.isArray(x.tallas) ? x.tallas : [], fotos: Array.isArray(x.fotos) ? x.fotos : [] }));
+    const SH = (window.APP_CONFIG || {}).sheetId;
+    if (SH) {
+      const csv = txt => { const R = []; let r = [], c = "", q = false; for (let i = 0; i < txt.length; i++) { const ch = txt[i];
+        if (q) { if (ch == '"') { if (txt[i+1] == '"') { c += '"'; i++; } else q = false; } else c += ch; }
+        else if (ch == '"') q = true; else if (ch == ",") { r.push(c); c = ""; } else if (ch == "\n") { r.push(c); R.push(r); r = []; c = ""; } else if (ch != "\r") c += ch; }
+        if (c || r.length) { r.push(c); R.push(r); } return R; };
+      const gv = h => fetch(`https://docs.google.com/spreadsheets/d/${SH}/gviz/tq?tqx=out:csv&headers=1&sheet=${encodeURIComponent(h)}&t=${Date.now()}`).then(r => r.text()).then(t => csv(t.trim()).slice(1));
+      const foto = u => { const m = String(u || "").match(/(?:\/d\/|[?&]id=)([\w-]{20,})/); return m ? `https://lh3.googleusercontent.com/d/${m[1]}=w800` : (/^https?:/.test(u) ? u : ""); };
+      const si = v => String(v).trim().toUpperCase() === "TRUE";
+      const [cf, pr] = await Promise.all([gv("Config"), gv("Productos")]);
+      const K = { nombre: "nombre", whatsapp: "whatsapp", lema: "lema", "envíos": "envios", envios: "envios", insignia: "insignia", tasa: "tasa" };
+      cf.forEach(r => { const k = K[String(r[0] || "").trim().toLowerCase()]; if (k && String(r[1] || "").trim()) S[k] = String(r[1]).trim(); });
+      const NOMS = (window.APP_CONFIG.categorias || ["Chaquetas", "Bodies", "Blusas", "Suéteres Tejidos"]), TS = ["XS", "S", "M", "L", "XL"];
+      SETS = [{ id: "t", tallas: TS }]; CATS = NOMS.map((n, i) => ({ id: "c" + i, nombre: n, tallas_id: "t", orden: i }));
+      const cid = n => { const i = NOMS.findIndex(x => x.toLowerCase() === String(n || "").trim().toLowerCase()); return i < 0 ? null : "c" + i; };
+      products = pr.filter(r => String(r[0] || "").trim() && si(r[10]) && cid(r[1])).map((r, i) => ({
+        id: "s" + (i + 2), categoria_id: cid(r[1]), nombre: r[0].trim(), descripcion: r[11] || "", precio: Number(String(r[2]).replace(",", ".")) || 0,
+        tallas: TS.filter((t, k) => si(r[3 + k])).map(t => ({ t, stock: null })), fotos: [foto(r[8]), foto(r[9])].filter(Boolean), nuevo: false, activo: true, orden: i, creado: "" }));
+    }
         if (!CATS.some(c => c.id === st.cat)) st.cat = CATS.length ? CATS[0].id : "todo";
   }
   try { await cargar(); }
@@ -288,7 +307,7 @@ img{display:block}
     if (N.waNum(S.whatsapp)) window.open(`https://wa.me/${N.waNum(S.whatsapp)}?text=${encodeURIComponent(msg)}`, "_blank");
     const b = $("#order"); b.disabled = true;
     try {
-      await db.insert("cat_pedidos", { id: N.uid(), codigo: cod, cliente: cli, telefono: tel, items: [{ id: p.id, nombre: p.nombre, precio: p.precio, talla: st.psize, cant: st.qty }], total: p.precio * st.qty, estado: "nuevo" });
+      if (!(window.APP_CONFIG || {}).sheetId) await db.insert("cat_pedidos", { id: N.uid(), codigo: cod, cliente: cli, telefono: tel, items: [{ id: p.id, nombre: p.nombre, precio: p.precio, talla: st.psize, cant: st.qty }], total: p.precio * st.qty, estado: "nuevo" });
       $("#okm").textContent = "✓ Pedido " + cod + " registrado. Te responderemos por WhatsApp."; $("#okm").style.display = "block";
       N.toast("✓ Pedido " + cod + " enviado");
       setTimeout(close, 1800);
