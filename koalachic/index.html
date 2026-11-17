@@ -45,6 +45,11 @@ img{display:block}
 .search svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--gold)}
 .chips{display:flex;gap:8px;overflow-x:auto;padding:12px 16px 2px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
+.tabs{position:sticky;top:0;z-index:50;display:grid;grid-template-columns:repeat(4,1fr);gap:0;padding:0;margin:14px 12px 0;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#f6ebe7;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.tabs .chip{border:0;border-right:1px solid var(--line);border-radius:0;background:transparent;padding:12px 4px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;line-height:1.2;white-space:normal}
+.tabs .chip:last-child{border-right:0}
+.tabs .chip.on{background:var(--goldg);color:#fff}
+.sel{padding:14px 16px 0;font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.5px}
 .chip{flex:0 0 auto;padding:8px 15px;border-radius:999px;border:1px solid var(--line);background:#f6ebe7;color:var(--txt);font-size:13px;font-weight:500}
 .chip.on{background:var(--goldg);color:#ffffff;border-color:transparent;font-weight:600}
 .sizes{display:flex;gap:7px;overflow-x:auto;padding:10px 16px 2px;align-items:center;scrollbar-width:none}
@@ -118,11 +123,12 @@ img{display:block}
   </div>
 </section>
 
+<nav class="tabs" id="cats"></nav>
+<div class="sel" id="sel"></div>
 <div class="search">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
   <input id="q" type="search" placeholder="Buscar productos…" autocomplete="off">
 </div>
-<nav class="chips" id="cats"></nav>
 <div class="sizes" id="sizes"></div>
 <div class="bar"><span class="cnt" id="cnt"></span>
   <select id="sort" aria-label="Ordenar">
@@ -170,8 +176,7 @@ img{display:block}
     ]);
     S = (a[0] && a[0].datos) || {}; SETS = t; CATS = c;
     products = p.map(x => ({ ...x, precio: Number(x.precio), tallas: Array.isArray(x.tallas) ? x.tallas : [], fotos: Array.isArray(x.fotos) ? x.fotos : [] }));
-    CATS = CATS.filter(c => products.some(p => p.categoria_id === c.id));
-    if (st.cat !== "todo" && !CATS.some(c => c.id === st.cat)) st.cat = "todo";
+        if (!CATS.some(c => c.id === st.cat)) st.cat = CATS.length ? CATS[0].id : "todo";
   }
   try { await cargar(); }
   catch(e) { $("#grid").innerHTML = `<div class="empty">${esc(e.message)}</div>`; return; }
@@ -197,7 +202,7 @@ img{display:block}
   const catBox = $("#cats");
   function renderCats(){
     catBox.innerHTML = "";
-    [{ id: "todo", nombre: "Todo" }].concat(CATS).forEach(c => {
+    CATS.forEach(c => {
       const b = document.createElement("button"); b.className = "chip"; b.textContent = c.nombre; b.dataset.id = c.id;
       b.onclick = () => { if (st.cat !== c.id) st.size = null; st.cat = c.id; render(); };
       catBox.appendChild(b);
@@ -205,7 +210,7 @@ img{display:block}
   }
   function sizeList(){
     if (st.cat === "todo") return uniq(SETS.reduce((a, s) => a.concat(s.tallas), []).concat(...products.map(tallasDe)));
-    return uniq((setDe(st.cat) || []).concat(...products.filter(p => p.categoria_id === st.cat).map(tallasDe)));
+    return setDe(st.cat) || uniq([].concat(...products.filter(p => p.categoria_id === st.cat).map(tallasDe)));
   }
   function renderSizes(){
     const box = $("#sizes"), L = sizeList();
@@ -228,11 +233,12 @@ img{display:block}
   function render(){
     catBox.querySelectorAll(".chip").forEach(b => b.classList.toggle("on", b.dataset.id === st.cat));
     renderSizes();
+    $("#sel").textContent = catNom(st.cat) + (st.size ? " · Talla " + st.size : "");
     const list = filtered(), g = $("#grid");
     $("#cnt").innerHTML = `<b>${list.length}</b> producto${list.length === 1 ? "" : "s"}`;
     if (!products.length) { g.innerHTML = `<div class="empty">Estamos preparando el catálogo. ¡Vuelve pronto!</div>`; return; }
-    if (!list.length) { g.innerHTML = `<div class="empty">No encontramos productos con esos filtros.<br><button id="clr">Limpiar filtros</button></div>`;
-      $("#clr").onclick = () => { st.cat = "todo"; st.size = null; st.q = ""; $("#q").value = ""; render(); }; return; }
+    if (!list.length) { g.innerHTML = `<div class="empty">${st.q ? "No encontramos productos con esa búsqueda." : st.size ? "Por ahora no hay prendas en talla " + esc(st.size) + " en esta categoría." : "Muy pronto subiremos prendas en esta categoría."}<br><button id="clr">Limpiar filtros</button></div>`;
+      $("#clr").onclick = () => { st.size = null; st.q = ""; $("#q").value = ""; render(); }; return; }
     g.innerHTML = list.map(p => { const ts = tallasDe(p); return `<article class="p">
       <div class="ph">${p.fotos[0] ? `<img src="${esc(N.img(p.fotos[0]))}" alt="${esc(p.nombre)}" loading="lazy">` : ""}${p.nuevo ? `<span class="new">Nuevo</span>` : ""}</div>
       <div class="b"><h3>${esc(p.nombre)}</h3><div class="s">${ts.length ? "Tallas: " + ts.map(esc).join(" · ") : "Agotado"}</div>
